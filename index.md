@@ -27,6 +27,6 @@ function Pinger_ping(ip, callback) {
 <HTML>
 	<BODY>
 		Hello World.
-		<A HREF="/Slide_Fabrication/Fabrication.html">Testing WebGL with slide concept</A>
+		<A HREF="Slide_Fabrication/Fabrication.html">Testing WebGL with slide concept</A>
 	</BODY>
 </HTML>
