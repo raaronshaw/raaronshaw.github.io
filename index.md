@@ -1,4 +1,4 @@
-<javascript>
+<script>
 function Pinger_ping(ip, callback) {
 
   if(!this.inUse) {
@@ -20,7 +20,7 @@ function Pinger_ping(ip, callback) {
 
   }
 }
-</javascript>
+</script>
 
 	
 
