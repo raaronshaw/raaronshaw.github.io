@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="jquery-3.4.1.min.js"></script>
+<script>
+var ya = 0
+	function test_ip(ip, status){
+	   setTimeout(function(){
+		  $.ajax({ url: "https://192.168.1.1", success: function(data){
+			//Update your dashboard gauge
+			Console.log(ya);
+			//Setup the next poll recursively
+			//poll();
+		  }, dataType: "json"});
+	  }, 300);
+
+	};
+	function test_ip_two(ip, status, timeout){
+		var testing = "https://"+ip;
+		var foo = $.ajax({ 
+			url: testing,//"https://"+ip, 
+			success: function(data){
+				//Update your dashboard gauge
+				Console.log(ya);
+				//Setup the next poll recursively
+				//poll();
+			},
+			error: function(request, error){
+				//console.log(data);
+				//console.log("test_two");
+				//console.log(arguments);
+				//console.log(" Can't do because: ");
+				//console.log(error);
+				switch(error){
+				
+				case "timeout":
+					status = 0;
+					break;
+				case "error":
+					status = 1;
+					break;
+				default:
+					status = -1;
+				};
+				console.log(testing, ip, status);
+				
+			},
+			dataType: "json",
+			timeout: timeout});
+		//console.log("foo is",foo);
+
+	};
+
+	/*function testtwo(){
+		var ping = new Date;
+
+		$.ajax({
+			url: "https://192.168.1.98",
+			cache:false,
+			success: function(output){ 
+				ping = new Date - ping;
+				Console.log("Ping/Latency: " + ping);
+				}
+		});
+	  };*/
+</script>	
+
+<HTML lang="en">
+	<HEAD>
+		<TITLE>SiteMap IP Health</TITLE>
+	</HEAD>
+	<BODY>
+		<P id="IP_Status">NULL</P>
+	</BODY>
+	<script> 
+		let f = 4;
+		var callback = 0;
+		console.log("Begin");
+		//poll();
+			
+		var status = -1;
+		var timeout = 300;
+		//var ip = "192.168.1.98";test_ip(ip, status); console.log(status);
+		//var ip = "192.168.1.1";test_ip(ip, status); console.log(status);
+		//var ip = "127.0.0.1";test_ip(ip, status); console.log(status);
+		
+		var ip = "192.168.1.98";test_ip_two(ip, status, timeout); //console.log(ip, status);
+		var ip1 = "192.168.1.1";test_ip_two(ip1, status, timeout); //console.log(ip, status);
+		var ip2 = "127.0.0.1";test_ip_two(ip2, status, timeout); //console.log(ip, status);
+		var ip3 = "192.168.1.101";test_ip_two(ip3, status, timeout); //console.log(ip, status);
+		
+		console.log("End");
+		/*var a = new XMLHttpRequest();
+		a.onreadystatechange = function () {
+
+			if (a.readyState === a.HEADERS_RECEIVED) {
+				a.abort();
+				console.log(new Date - abc);
+			}
+		};
+
+		var abc = new Date;
+
+		a.open("GET", "https://192.168.1.92");
+		a.send(null);
+		console.log("END TWO");*/
+
+		
+		
+	</script>
+	<noscript>Current settings do not support JavaScript.</noscript>
+</HTML>
