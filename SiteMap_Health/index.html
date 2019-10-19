@@ -1,53 +1,52 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
-<script>
-var ya = 0
-	function test_ip(ip, status){
-	   setTimeout(function(){
-		  $.ajax({ url: "https://192.168.1.1", success: function(data){
-			//Update your dashboard gauge
-			Console.log(ya);
-			//Setup the next poll recursively
-			//poll();
-		  }, dataType: "json"});
-	  }, 300);
 
-	};
-	function test_ip_two(ip, status, timeout){
-		var testing = "https://"+ip;
-		var foo = $.ajax({ 
-			url: testing,//"https://"+ip, 
-			success: function(data){
+<script>
+	function test_ip(ip, status){
+		this.status = 0;
+		
+		
+		//var promise = $.ajax({ timeout: 1000 });
+
+
+		var t = setTimeout(function(){
+			$.ajax({ url: ip, success: function(data){
 				//Update your dashboard gauge
-				Console.log(ya);
+				
 				//Setup the next poll recursively
 				//poll();
-			},
+			  }, dataType: "json",
+			  error: function(jqXHR, textStatus, errorThrown) 
+				{
+					console.log(t);
+					console.log(textStatus, errorThrown);
+					if(textStatus==="timeout") console.log("does not exist");//do something on timeout
+					else console.log("it is alive");
+				} 
+			});
+		}, 300);
+		console.log(ip, t);
+	  
+	 // promise.fail(function(jqXHR, textStatus) {
+   // if(textStatus==="timeout") {
+        // handle timeout  
+   // }
+	};
+	  
+	function test_ip_two(ip, status, timeout){
+		this.status = 0;
+		$.ajax({ 
+			url: ip,//"https://"+ip, 
 			error: function(request, error){
-				//console.log(data);
-				//console.log("test_two");
-				//console.log(arguments);
-				//console.log(" Can't do because: ");
-				//console.log(error);
-				switch(error){
-				
-				case "timeout":
-					status = 0;
-					break;
-				case "error":
-					status = 1;
-					break;
-				default:
-					status = -1;
-				};
-				console.log(testing, ip, status);
-				
+				this.status = 1;
+				console.log("BEGIN ",ip,this.status," END");
 			},
 			dataType: "json",
-			timeout: timeout});
-		//console.log("foo is",foo);
-
+			timeout: 30000});
+		
+		
+		
 	};
 
 	/*function testtwo(){
@@ -71,6 +70,7 @@ var ya = 0
 	<BODY>
 		<P id="IP_Status">NULL</P>
 	</BODY>
+
 	<script> 
 		let f = 4;
 		var callback = 0;
@@ -79,14 +79,15 @@ var ya = 0
 			
 		var status = -1;
 		var timeout = 300;
-		//var ip = "192.168.1.98";test_ip(ip, status); console.log(status);
-		//var ip = "192.168.1.1";test_ip(ip, status); console.log(status);
-		//var ip = "127.0.0.1";test_ip(ip, status); console.log(status);
+		//var ip = "https://192.168.1.98";test_ip(ip, status); console.log(status);
+		//var ip = "https://192.168.1.1";test_ip(ip, status); console.log(status);
+		//var ip = "https://127.0.0.1";test_ip(ip, status); console.log(status);
+		//var ip = "https://192.168.1.101";test_ip(ip, status); console.log(status);
 		
-		var ip = "192.168.1.98";test_ip_two(ip, status, timeout); //console.log(ip, status);
-		var ip1 = "192.168.1.1";test_ip_two(ip1, status, timeout); //console.log(ip, status);
-		var ip2 = "127.0.0.1";test_ip_two(ip2, status, timeout); //console.log(ip, status);
-		var ip3 = "192.168.1.101";test_ip_two(ip3, status, timeout); //console.log(ip, status);
+		var ip = "https://192.168.1.98";test_ip_two(ip, status, timeout); //console.log(ip, status);
+		var ipone = "https://192.168.1.1";test_ip_two(ipone, status, timeout); //console.log(ip, status);
+		var iptwo = "https://127.0.0.1";test_ip_two(iptwo, status, timeout); //console.log(ip, status);
+		var ip3 = "https://192.168.1.101";test_ip_two(ip3, status, timeout); //console.log(ip, status);
 		
 		console.log("End");
 		/*var a = new XMLHttpRequest();
