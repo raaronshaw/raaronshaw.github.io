@@ -3,64 +3,68 @@
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
 
 <script>
-	function test_ip(ip, status){
-		this.status = 0;
-		
-		
-		//var promise = $.ajax({ timeout: 1000 });
+	function build_table(list) {
+       var mybody = document.getElementsByTagName("body")[0];
+       var IP_Table = document.createElement("table");
+	   IP_Table.id = "IP_Status_Table";
+       var mytablebody = document.createElement("tbody");
 
+       for(var row = 0; row < list.length; row++) {
+           mycurrent_row=document.createElement("tr");
+           for(var col = 0; col < 2; col++) {
+               mycurrent_cell = document.createElement("td");
+               if(col===0) currenttext = document.createTextNode(list[row]);
+			   if(col===1) currenttext = document.createTextNode("PROCESSING ");
+               mycurrent_cell.appendChild(currenttext);
+               mycurrent_row.appendChild(mycurrent_cell);
+           }
+           mytablebody.appendChild(mycurrent_row);
+       }
+       IP_Table.appendChild(mytablebody);
+       mybody.appendChild(IP_Table);
+    }
 
-		var t = setTimeout(function(){
-			$.ajax({ url: ip, success: function(data){
-				//Update your dashboard gauge
-				
-				//Setup the next poll recursively
-				//poll();
-			  }, dataType: "json",
-			  error: function(jqXHR, textStatus, errorThrown) 
+	function ip_response(ip, timeout, return_delay)
+	{
+		var myTable = document.getElementById("IP_Status_Table");
+		if(myTable != null)
+		{
+			for(var i = 0; i< myTable.rows.length; i++)
+			{
+				if(myTable.rows[i].cells[0].innerHTML===ip)
 				{
-					console.log(t);
-					console.log(textStatus, errorThrown);
-					if(textStatus==="timeout") console.log("does not exist");//do something on timeout
-					else console.log("it is alive");
-				} 
-			});
-		}, 300);
-		console.log(ip, t);
-	  
-	 // promise.fail(function(jqXHR, textStatus) {
-   // if(textStatus==="timeout") {
-        // handle timeout  
-   // }
+					if(timeout>return_delay)
+					{
+						myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
+						myTable.rows[i].cells[1].innerHTML="CONNECTED";
+					}
+					else 
+					{
+						myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
+						myTable.rows[i].cells[1].innerHTML="FAILED";
+					}
+				};
+				/*for(var j = 0; j<myTable.rows[i].cells.length; j++)
+				{
+					console.log(myTable.rows[i].cells[j].innerHTML);
+				};*/
+			};
+		};
 	};
 	  
-	function test_ip_two(ip, status, timeout){
-		this.status = 0;
+	function test_ip(ip, timeout, return_delay, callback){
+		var timestart = new Date().getTime();
 		$.ajax({ 
-			url: ip,//"https://"+ip, 
+			url: "https://"+ip,
+			data: timestart,
 			error: function(request, error){
-				this.status = 1;
-				console.log("BEGIN ",ip,this.status," END");
+				return_delay = new Date().getTime()-timestart;
+				callback(ip, timeout, return_delay);
 			},
 			dataType: "json",
-			timeout: 30000});
-		
-		
-		
+			timeout: timeout});
 	};
 
-	/*function testtwo(){
-		var ping = new Date;
-
-		$.ajax({
-			url: "https://192.168.1.98",
-			cache:false,
-			success: function(output){ 
-				ping = new Date - ping;
-				Console.log("Ping/Latency: " + ping);
-				}
-		});
-	  };*/
 </script>	
 
 <HTML lang="en">
@@ -68,28 +72,25 @@
 		<TITLE>SiteMap IP Health</TITLE>
 	</HEAD>
 	<BODY>
-		<P id="IP_Status">NULL</P>
 	</BODY>
 
 	<script> 
-		let f = 4;
-		var callback = 0;
-		console.log("Begin");
-		//poll();
-			
-		var status = -1;
-		var timeout = 300;
-		//var ip = "https://192.168.1.98";test_ip(ip, status); console.log(status);
-		//var ip = "https://192.168.1.1";test_ip(ip, status); console.log(status);
-		//var ip = "https://127.0.0.1";test_ip(ip, status); console.log(status);
-		//var ip = "https://192.168.1.101";test_ip(ip, status); console.log(status);
+		var iplist;
 		
-		var ip = "https://192.168.1.98";test_ip_two(ip, status, timeout); //console.log(ip, status);
-		var ipone = "https://192.168.1.1";test_ip_two(ipone, status, timeout); //console.log(ip, status);
-		var iptwo = "https://127.0.0.1";test_ip_two(iptwo, status, timeout); //console.log(ip, status);
-		var ip3 = "https://192.168.1.101";test_ip_two(ip3, status, timeout); //console.log(ip, status);
-		
-		console.log("End");
+		iplist = [
+			"127.0.0.1",
+			"192.168.1.98",
+			"192.168.1.1",
+			"192.168.1.101"];
+		build_table(iplist);
+		var timeout = 5000;
+
+		for(var i =0; i<iplist.length; i++)
+		{
+			test_ip(iplist[i], timeout, iplist[i].delay, ip_response);
+		};
+
+
 		/*var a = new XMLHttpRequest();
 		a.onreadystatechange = function () {
 
