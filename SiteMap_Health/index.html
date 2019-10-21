@@ -27,6 +27,8 @@
 	function ip_response(ip, timeout, return_delay)
 	{
 		var myTable = document.getElementById("IP_Status_Table");
+		var overlayIcon = document.getElementById(ip);
+		console.log(overlayIcon);
 		if(myTable != null)
 		{
 			for(var i = 0; i< myTable.rows.length; i++)
@@ -37,11 +39,13 @@
 					{
 						myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
 						myTable.rows[i].cells[1].innerHTML="CONNECTED";
+						overlayIcon.src="img/CONNECTED.jpg"
 					}
 					else 
 					{
 						myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
 						myTable.rows[i].cells[1].innerHTML="FAILED";
+						overlayIcon.src="img/FAILED.jpg"
 					}
 				};
 				/*for(var j = 0; j<myTable.rows[i].cells.length; j++)
@@ -72,8 +76,36 @@
 		<TITLE>SiteMap IP Health</TITLE>
 	</HEAD>
 	<BODY>
-	</BODY>
 
+<!--BEGIN IMAGE OVERLAY TEST-->
+<style>
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.container img {
+  width: 100%;
+  height: auto;
+}
+
+
+
+}
+</style>
+
+<div class="container">
+  <img src="img\SiteMap.jpg" alt="SiteMap" style="width:100%">
+  
+  <img src="img\PROCESSING.jpg" class="IP_Status" id="127.0.0.1" style="width:10px; top:80%; left:55%; position:absolute">
+  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.98" style="width:10px; top:84%; left:55%; position:absolute">
+  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.1" style="width:10px; top:89%; left:41%; position:absolute">
+  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.101" style="width:10px; top:89%; left:38%; position:absolute">
+</div>
+<!--END IMAGE OVERLAY TEST-->
+
+	</BODY>
 	<script> 
 		var iplist;
 		
@@ -85,11 +117,28 @@
 		build_table(iplist);
 		var timeout = 5000;
 
+//BEGIN IMAGE OVERLAY TEST
+
+
+
+
+
+
+
+
+
+
+
+
+
+//END IMAGE OVERLAY TEST		
+		
+		
 		for(var i =0; i<iplist.length; i++)
 		{
 			test_ip(iplist[i], timeout, iplist[i].delay, ip_response);
 		};
-
+	
 
 		/*var a = new XMLHttpRequest();
 		a.onreadystatechange = function () {
