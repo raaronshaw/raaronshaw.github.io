@@ -3,7 +3,7 @@
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
 
 <script>
-	function build_table(list) {
+	/*function build_table(list) {
        var mybody = document.getElementsByTagName("body")[0];
        var IP_Table = document.createElement("table");
 	   IP_Table.id = "IP_Status_Table";
@@ -23,37 +23,37 @@
        IP_Table.appendChild(mytablebody);
        mybody.appendChild(IP_Table);
     }
-
+*/
 	function ip_response(ip, timeout, return_delay)
 	{
-		var myTable = document.getElementById("IP_Status_Table");
+		//var myTable = document.getElementById("IP_Status_Table");
 		var overlayIcon = document.getElementById(ip);
-		console.log(overlayIcon);
-		if(myTable != null)
-		{
-			for(var i = 0; i< myTable.rows.length; i++)
-			{
-				if(myTable.rows[i].cells[0].innerHTML===ip)
-				{
+		//console.log(overlayIcon);
+		//if(myTable != null)
+		//{
+		//	for(var i = 0; i< myTable.rows.length; i++)
+		//	{
+		//		if(myTable.rows[i].cells[0].innerHTML===ip)
+			//	{
 					if(timeout>return_delay)
 					{
-						myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
-						myTable.rows[i].cells[1].innerHTML="CONNECTED";
+						//myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
+						//myTable.rows[i].cells[1].innerHTML="CONNECTED";
 						overlayIcon.src="img/CONNECTED.jpg"
 					}
 					else 
 					{
-						myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
-						myTable.rows[i].cells[1].innerHTML="FAILED";
+						//myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
+						//myTable.rows[i].cells[1].innerHTML="FAILED";
 						overlayIcon.src="img/FAILED.jpg"
 					}
-				};
-				/*for(var j = 0; j<myTable.rows[i].cells.length; j++)
-				{
-					console.log(myTable.rows[i].cells[j].innerHTML);
-				};*/
-			};
-		};
+			//	};
+				//for(var j = 0; j<myTable.rows[i].cells.length; j++)
+				//{
+				//	console.log(myTable.rows[i].cells[j].innerHTML);
+				//};
+			//};
+		//};
 	};
 	  
 	function test_ip(ip, timeout, return_delay, callback){
@@ -82,7 +82,7 @@
 .container {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  
 }
 
 .container img {
@@ -95,48 +95,255 @@
 }
 </style>
 
-<div class="container">
-  <img src="img\SiteMap.jpg" alt="SiteMap" style="width:100%">
+<div id="SiteMap" class="container">
+  <img src="img\SITEMAP_20180621_300dpi.png" alt="SiteMap" style="width:100%">
   
-  <img src="img\PROCESSING.jpg" class="IP_Status" id="127.0.0.1" style="width:10px; top:80%; left:55%; position:absolute">
+ <!-- <img src="img\PROCESSING.jpg" class="IP_Status" id="127.0.0.1" style="width:10px; top:80%; left:55%; position:absolute">
   <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.98" style="width:10px; top:84%; left:55%; position:absolute">
   <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.1" style="width:10px; top:89%; left:41%; position:absolute">
-  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.101" style="width:10px; top:89%; left:38%; position:absolute">
+  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.101" style="width:10px; top:89%; left:38%; position:absolute">-->
 </div>
 <!--END IMAGE OVERLAY TEST-->
 
 	</BODY>
 	<script> 
-		var iplist;
+	//var elem = document.createElement("img");
+		//elem.setAttribute("src", "img/FOO.jpg");
+		//elem.setAttribute("id", "0.0.0.0");
+		//elem.setAttribute("style", "width:10px; position:absolute; top:84%; left:55%");
+		//elem.setAttribute("alt", "Flower");
+		//document.getElementById("SiteMap").appendChild(elem);
+
+		/*var iplist;
 		
 		iplist = [
 			"127.0.0.1",
 			"192.168.1.98",
 			"192.168.1.1",
-			"192.168.1.101"];
-		build_table(iplist);
-		var timeout = 5000;
-
-//BEGIN IMAGE OVERLAY TEST
-
-
-
-
-
-
-
-
-
-
-
-
-
-//END IMAGE OVERLAY TEST		
+			"192.168.1.101"];*/
+		var padx = 300;
+		var offsetx = 470;
 		
+		var pady = 490;
+		var offsety = 230;
 		
-		for(var i =0; i<iplist.length; i++)
+		var camera = [
+			["127.0.0.1", "23",0,0],
+			["127.0.0.1", "24",0,0],
+			["127.0.0.1", "25",0,0],
+			["127.0.0.1", "26",0,0],
+			["127.0.0.1", "27",0,0],
+			["127.0.0.1", "28",0,0],
+			["127.0.0.1", "29",0,0],
+			["127.0.0.1", "30",0,0],
+			["127.0.0.1", "31",0,0],
+			["127.0.0.1", "32",0,0],
+			["127.0.0.1", "33",0,0],
+			["127.0.0.1", "34",0,0],
+			["127.0.0.1", "35",0,0],
+			["127.0.0.1", "36",0,0],
+			["127.0.0.1", "37",0,0],
+			["127.0.0.1", "38",0,0],
+			["127.0.0.1", "39",0,0],
+			["127.0.0.1", "40",0,0],
+			["127.0.0.1", "41",0,0],
+			["127.0.0.1", "42",0,0],
+			["127.0.0.1", "43",0,0],
+			["127.0.0.1", "44",0,0],
+			["127.0.0.1", "45",0,0],
+			["127.0.0.1", "46",0,0],
+			["127.0.0.1", "47",0,0],
+			["127.0.0.1", "48",0,0],
+			["127.0.0.1", "49",0,0],
+			["127.0.0.1", "50", (offsetx+158)/(padx+1400), (offsety+163)/(pady+890)],
+			["192.168.1.98", "51", (offsetx+174)/(padx+1400), (offsety+163)/(pady+890)],
+			["192.168.1.1", "52", (offsetx+189)/(padx+1400), (offsety+163)/(pady+890)],
+			["192.168.1.101", "53", (offsetx+203)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "54", (offsetx+214)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "55", (offsetx+227)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "56", (offsetx+240)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "57", (offsetx+255)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "58", (offsetx+267)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "59", (offsetx+279)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "60", (offsetx+293)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "61", (offsetx+306)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "62", (offsetx+319)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "63", (offsetx+331)/(padx+1400), (offsety+163)/(pady+890)],
+			["127.0.0.1", "64",0,0],
+			//Void from 65 thru 136
+			["127.0.0.1", "137",1,1],
+			["127.0.0.1", "138",1,1],
+			["127.0.0.1", "139",0,0],
+			["127.0.0.1", "140",0,0],
+			["127.0.0.1", "141",0,0],
+			["127.0.0.1", "142",0,0],
+			["127.0.0.1", "143",0,0],
+			["127.0.0.1", "144",0,0],
+			["127.0.0.1", "145",0,0],
+			["127.0.0.1", "146",0,0],
+			["127.0.0.1", "147",0,0],
+			["127.0.0.1", "148",1,1],
+			//Void from 149 thru 300
+			
+			["127.0.0.1", "253", (offsetx+45)/(padx+1400), (offsety+676)/(pady+890)],
+			["127.0.0.1", "254", (offsetx+47)/(padx+1400), (offsety+656)/(pady+890)],
+			["127.0.0.1", "255", (offsetx+48)/(padx+1400), (offsety+642)/(pady+890)],
+			["127.0.0.1", "256", (offsetx+45)/(padx+1400), (offsety+618)/(pady+890)],
+			//void
+			["127.0.0.1", "274", (offsetx+46)/(padx+1400), (offsety+328)/(pady+890)],
+			["127.0.0.1", "275", (offsetx+45)/(padx+1400), (offsety+317)/(pady+890)],
+			["127.0.0.1", "276", (offsetx+46)/(padx+1400), (offsety+302)/(pady+890)],
+			["127.0.0.1", "277", (offsetx+47)/(padx+1400), (offsety+281)/(pady+890)],
+			
+			
+			//Void
+			["127.0.0.1", "301", 1,1],
+			["127.0.0.1", "302", 1,1],
+			["127.0.0.1", "303", 0,0],
+			["127.0.0.1", "304", 0,0],
+			["127.0.0.1", "305", 1,1],
+			["127.0.0.1", "306", 1,1],
+			["127.0.0.1", "307", 1,1],
+			["127.0.0.1", "308", 0,0],
+			["127.0.0.1", "309", 1,1],
+			["127.0.0.1", "310", 0,0],
+			["127.0.0.1", "311", 0,0],
+			["127.0.0.1", "312", 0,0],
+			["127.0.0.1", "313", 0,0],
+			["127.0.0.1", "314", 0,0],
+			["127.0.0.1", "315", 0,0],
+			["127.0.0.1", "316", 0,0],
+			["127.0.0.1", "317", 0,0],
+			["127.0.0.1", "318", 0,0],
+			["127.0.0.1", "319", 0,0],
+			["127.0.0.1", "320", 1,1],
+			["127.0.0.1", "321", 1,1],
+			["127.0.0.1", "322",0,0],
+			["127.0.0.1", "323",0,0],
+			["127.0.0.1", "324",0,0],
+			["127.0.0.1", "325", 1,1],
+			["127.0.0.1", "326",0,0],
+			["127.0.0.1", "327", 1,1],
+			["127.0.0.1", "328", 1,1],
+			["127.0.0.1", "329", 1,1],
+			["127.0.0.1", "330", 1,1],
+			["127.0.0.1", "331", 1,1],
+			["127.0.0.1", "332", 1,1],
+			["127.0.0.1", "333",0,0],
+			["127.0.0.1", "334", 1,1],
+			["127.0.0.1", "335", 1,1],
+			["127.0.0.1", "336", 1,1],
+			["127.0.0.1", "335",0,0],
+			["127.0.0.1", "338", 1,1],
+			["127.0.0.1", "339", 1,1],
+			["127.0.0.1", "340", 1,1],
+			["127.0.0.1", "341", 1,1],
+			["127.0.0.1", "342", 1,1],
+			["127.0.0.1", "343", 1,1],
+			["127.0.0.1", "344",0,0],
+			["127.0.0.1", "345", 1,1],
+			["127.0.0.1", "346", 1,1],
+			["127.0.0.1", "347", 1,1],
+			["127.0.0.1", "348", 1,1],
+			["127.0.0.1", "349", 0,0],
+			["127.0.0.1", "350", 1,1],
+			["127.0.0.1", "351", 1,1],
+			["127.0.0.1", "352", 1,1],
+			["127.0.0.1", "353", 1,1],
+			["127.0.0.1", "354", 1,1],
+			["127.0.0.1", "355", 1,1],
+			["127.0.0.1", "356", 1,1],
+			["127.0.0.1", "357", 1,1],
+			["127.0.0.1", "358", 1,1],
+			["127.0.0.1", "359", 0,0],
+			["127.0.0.1", "360", 0,0],
+			["127.0.0.1", "361", 1,1],
+			["127.0.0.1", "362", 1,1],
+			["127.0.0.1", "363", 1,1],
+			["127.0.0.1", "364", 1,1],
+			["127.0.0.1", "365", 0,0],
+			["127.0.0.1", "366", 1,1],
+			["127.0.0.1", "367", 1,1],
+			["127.0.0.1", "368", 1,1],
+			["127.0.0.1", "369", 1,1],
+			["127.0.0.1", "370", 1,1],
+			["127.0.0.1", "371", 1,1],
+			["127.0.0.1", "372", 1,1],
+			["127.0.0.1", "373", (offsetx+67)/(padx+1400), (offsety+240)/(pady+890)],
+			["127.0.0.1", "374", (offsetx+56)/(padx+1400), (offsety+376)/(pady+890)],
+			["127.0.0.1", "375", (offsetx+83)/(padx+1400), (offsety+439)/(pady+890)],
+			["127.0.0.1", "376", 1,1],
+			["127.0.0.1", "377", 1,1],
+			["127.0.0.1", "378", 1,1],
+			["127.0.0.1", "379", 0,0],
+			["127.0.0.1", "380", 0,0],
+			["127.0.0.1", "381", 1,1],
+			["127.0.0.1", "382", 1,1],
+			["127.0.0.1", "383", 1,1],
+			["127.0.0.1", "384", 1,1],
+			["127.0.0.1", "385", 1,1],
+			["127.0.0.1", "386", 1,1],
+			["127.0.0.1", "387", 0,0],
+			["127.0.0.1", "388", (offsetx+140)/(padx+1400), (offsety+276)/(pady+890)],
+			["127.0.0.1", "389", (offsetx+139)/(padx+1400), (offsety+391)/(pady+890)],
+			["127.0.0.1", "390", 0,0],
+			["127.0.0.1", "391", 0,0],
+			["127.0.0.1", "392", 1,1],
+			["127.0.0.1", "393", (offsetx+205)/(padx+1400), (offsety+203)/(pady+890)],
+			["127.0.0.1", "394", (offsetx+301)/(padx+1400), (offsety+204)/(pady+890)],
+			["127.0.0.1", "395", 1,1],
+			["127.0.0.1", "396",0,0],
+			["127.0.0.1", "397", 1,1],
+			["127.0.0.1", "400", 1,1],
+			["127.0.0.1", "401",0,0],
+			["127.0.0.1", "402",0,0],
+			["127.0.0.1", "403",0,0],
+			["127.0.0.1", "404", 1,1],
+			["127.0.0.1", "405", 1,1],
+			["127.0.0.1", "406", 1,1],
+			["127.0.0.1", "407", 1,1],
+			["127.0.0.1", "408", 1,1],
+			["127.0.0.1", "409", 1,1],
+			["127.0.0.1", "410", (offsetx+265)/(padx+1400),(offsety+181)/(pady+890)],
+			["127.0.0.1", "411", 0,0],
+			["127.0.0.1", "412", 1,1],
+			["127.0.0.1", "413", 1,1],
+			["127.0.0.1", "414", 1,1],
+			["127.0.0.1", "415", 1,1],
+			["127.0.0.1", "416", 1,1],
+			["127.0.0.1", "417", 1,1],
+			["127.0.0.1", "418", (offsetx+81)/(padx+1400), (offsety+422)/(pady+890)]
+		];
+		
+
+		
+		for(var i = 0 ;i<camera.length; i++)
 		{
-			test_ip(iplist[i], timeout, iplist[i].delay, ip_response);
+			var elem = document.createElement("img");
+			elem.setAttribute("src", "img/PROCESSING.jpg");
+			elem.setAttribute("id", camera[i][0]);
+			elem.setAttribute("style", "width:10px; position:absolute; left:"+camera[i][2]*100+"%; top:"+camera[i][3]*100+"%");
+			elem.setAttribute("alt", "Camera");
+			document.getElementById("SiteMap").appendChild(elem);
+		};
+
+		
+		
+		
+		
+		//build_table(iplist);
+		var timeout = 6000;
+		//var camera_icon;
+		//for(int i=0; i<iplist.length;i++)
+		//{
+		//		camera[i].ip = iplist[i]
+		//}
+
+	
+		
+		for(var i =0; i<camera.length; i++)
+		{
+			test_ip(camera[i][0], timeout, camera[i].delay, ip_response);
 		};
 	
 
