@@ -1,135 +1,14 @@
 <!DOCTYPE html>
 
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>
-
 <script>
-	function build_table(list) {
-       var mybody = document.getElementsByTagName("body")[0];
-       var IP_Table = document.createElement("table");
-	   IP_Table.id = "IP_Status_Table";
-       var mytablebody = document.createElement("tbody");
-
-       for(var row = 0; row < list.length; row++) {
-           mycurrent_row=document.createElement("tr");
-           for(var col = 0; col < 4; col++) {
-               mycurrent_cell = document.createElement("td");
-               if(col===0) currenttext = document.createTextNode(list[row][0]);
-			   if(col===1) currenttext = document.createTextNode("PROCESSING ");
-			   if(col===2) currenttext = document.createTextNode(list[row][1]);
-			   if(col===3) currenttext = document.createTextNode(list[row][4]);
-               mycurrent_cell.appendChild(currenttext);
-               mycurrent_row.appendChild(mycurrent_cell);
-           }
-           mytablebody.appendChild(mycurrent_row);
-       }
-       IP_Table.appendChild(mytablebody);
-       mybody.appendChild(IP_Table);
-    }
-
-	function ip_response(ip, timeout, return_delay)
-	{
-		var myTable = document.getElementById("IP_Status_Table");
-		var overlayIcon = document.getElementById(ip);
-		//console.log(overlayIcon);
-		if(myTable != null)
-		{
-			for(var i = 0; i< myTable.rows.length; i++)
-			{
-				if(myTable.rows[i].cells[0].innerHTML===ip)
-				{
-					if(timeout>return_delay)
-					{
-						myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
-						myTable.rows[i].cells[1].innerHTML="CONNECTED";
-						overlayIcon.src="img/CONNECTED.jpg"
-					}
-					else 
-					{
-						myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
-						myTable.rows[i].cells[1].innerHTML="FAILED";
-						overlayIcon.src="img/FAILED.jpg"
-					}
-				};
-				//for(var j = 0; j<myTable.rows[i].cells.length; j++)
-				//{
-				//	console.log(myTable.rows[i].cells[j].innerHTML);
-				//};
-			};
-		};
-	};
-	  
-	function test_ip(ip, timeout, return_delay, callback){
-		var timestart = new Date().getTime();
-		$.ajax({ 
-			url: "https://"+ip,
-			data: timestart,
-			error: function(request, error){
-				return_delay = new Date().getTime()-timestart;
-				callback(ip, timeout, return_delay);
-			},
-			dataType: "json",
-			timeout: timeout});
-	};
-
-</script>	
-
-<HTML lang="en">
-	<HEAD>
-		<TITLE>SiteMap IP Health</TITLE>
-	</HEAD>
-	<BODY>
-
-<!--BEGIN IMAGE OVERLAY TEST-->
-<style>
-.container {
-  position: relative;
-  width: 100%;
-  
-}
-
-.container img {
-  width: 100%;
-  height: auto;
-}
-
-
-
-}
-</style>
-
-<div id="SiteMap" class="container">
-  <img src="img\SITEMAP_20180621_300dpi.png" alt="SiteMap" style="width:100%">
-  
- <!-- <img src="img\PROCESSING.jpg" class="IP_Status" id="127.0.0.1" style="width:10px; top:80%; left:55%; position:absolute">
-  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.98" style="width:10px; top:84%; left:55%; position:absolute">
-  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.1" style="width:10px; top:89%; left:41%; position:absolute">
-  <img src="img\PROCESSING.jpg" class="IP_Status" id="192.168.1.101" style="width:10px; top:89%; left:38%; position:absolute">-->
-</div>
-<!--END IMAGE OVERLAY TEST-->
-
-	</BODY>
-	<script> 
-	//var elem = document.createElement("img");
-		//elem.setAttribute("src", "img/FOO.jpg");
-		//elem.setAttribute("id", "0.0.0.0");
-		//elem.setAttribute("style", "width:10px; position:absolute; top:84%; left:55%");
-		//elem.setAttribute("alt", "Flower");
-		//document.getElementById("SiteMap").appendChild(elem);
-
-		/*var iplist;
-		
-		iplist = [
-			"127.0.0.1",
-			"192.168.1.98",
-			"192.168.1.1",
-			"192.168.1.101"];*/
-		var padx = 300;
+	var padx = 300;
 		var offsetx = 470;
 		
 		var pady = 490;
 		var offsety = 230;
 		
-		var camera = [
+		const camera = [
 			["10.45.16.94", 	"1",	0,0,"NW corner	Dome	SNP-6321H	Back Box - Light Bracket	Security	"],
 			["10.45.18.135", 	"2",	0,0,"North wall (west side)	Dome	XNF-8010 RV	Back Box - Light Bracket	Security	"],
 			["10.45.24.89", 	"4",	0,0,"00:09:18:4e:ad:37		360	XNF-8010 RV		Security	"],
@@ -539,25 +418,182 @@
 		
 
 		];
-		
+</script>
+<script>
+	function build_table(list) {
+       var mybody = document.getElementsByTagName("body")[0];
+       var IP_Table = document.createElement("table");
+	   IP_Table.id = "IP_Status_Table";
+       var mytablebody = document.createElement("tbody");
+
+       for(var row = 0; row < list.length; row++) {
+           mycurrent_row=document.createElement("tr");
+           for(var col = 0; col < 4; col++) {
+               mycurrent_cell = document.createElement("td");
+               if(col===0) currenttext = document.createTextNode(list[row][0]);
+			   if(col===1) currenttext = document.createTextNode("WAITING");
+			   if(col===2) currenttext = document.createTextNode(list[row][1]);
+			   if(col===3) currenttext = document.createTextNode(list[row][4]);
+               mycurrent_cell.appendChild(currenttext);
+               mycurrent_row.appendChild(mycurrent_cell);
+           }
+           mytablebody.appendChild(mycurrent_row);
+       }
+       IP_Table.appendChild(mytablebody);
+       mybody.appendChild(IP_Table);
+    }
+
+	function ip_response(ip, timeout, return_delay)
+	{
+		var myTable = document.getElementById("IP_Status_Table");
+		var overlayIcon = document.getElementById(ip);
+		//console.log(overlayIcon);
+		var pass = Math.abs(document.getElementById("goodTimeOut").innerHTML-return_delay);
+		var fail = Math.abs(document.getElementById("badTimeOut").innerHTML-return_delay);
+		console.log(return_delay, pass, fail);
+		if(myTable != null)
+		{
+			for(var i = 0; i< myTable.rows.length; i++)
+			{
+				if(myTable.rows[i].cells[0].innerHTML===ip)
+				{
+					if(pass<fail)
+					{
+						myTable.rows[i].cells[1].style.background = "rgb(0,255,0)";
+						myTable.rows[i].cells[1].innerHTML="CONNECTED";
+						if (overlayIcon != null) overlayIcon.src="img/CONNECTED.jpg";
+					}
+					else 
+					{
+						myTable.rows[i].cells[1].style.background = "rgb(255,0,0)";
+						myTable.rows[i].cells[1].innerHTML="FAILED";
+						if (overlayIcon != null) overlayIcon.onload() = overlayIcon.src="img/FAILED.jpg";
+					}
+				};
+			};
+		};
+	};
+	  
+	function test_ip(ip, timeout, return_delay, callback){
+		var timestart = new Date().getTime();
+		$.ajax({ 
+			url: "https://"+ip,
+			data: timestart,
+			error: function(request, error){
+				return_delay = new Date().getTime()-timestart;
+				callback(ip, timeout, return_delay);
+			},
+			dataType: "json",
+			timeout: timeout});
+	};
+
+	function sequencegood(ip, timeout, return_delay)
+	{
+
+		var goodIP = document.getElementById("goodIP").value;
+		var badIP = document.getElementById("badIP").value;
+		document.getElementById("goodTimeOut").innerHTML = return_delay;
+
+	};
+	function sequencebad(ip, timeout, return_delay)
+	{
+		var badIP = document.getElementById("badIP").value;
+		document.getElementById("badTimeOut").innerHTML = return_delay;
+		for(var i =0; i<camera.length; i++)
+		{
+			test_ip(camera[i][0], 20000, camera[i].delay, ip_response);
+		};		
+	};	
+	
+
+	function refreshData(camera)
+	{
+		var goodIP = document.getElementById("goodIP").value;
+		var badIP = document.getElementById("badIP").value;
+		var return_delay1, return_delay2;
+		test_ip(goodIP, 60000, return_delay1, sequencegood);
+		test_ip(badIP, 60000, return_delay2, sequencebad);
 
 		
-		for(var i = 0 ;i<camera.length; i++)
+	};
+	
+</script>	
+
+<HTML lang="en">
+	<HEAD>
+		<TITLE>SiteMap IP Health</TITLE>
+	</HEAD>
+	<BODY>
+
+<!--BEGIN IMAGE OVERLAY TEST-->
+<style>
+.container {
+  position: relative;
+  width: 100%;
+  
+}
+
+.container img {
+  width: 100%;
+  height: auto;
+}
+
+
+
+}
+</style>
+
+
+	Site Map Camera Health<br>
+	<button onclick="refreshData(camera)">Refresh</button><br>
+	Known Good IP:&nbsp<input type="text" name="Good IP" id="goodIP" value="127.0.0.1">&nbsp<div id="goodTimeOut">100</div><br>
+	Known Bad IP :&nbsp<input type="text" name="Bad IP" id="badIP" value="10.45.16.254">&nbsp<div id="badTimeOut">20000</div><br>
+	
+		
+		
+	<div id="SiteMap" class="container">	
+		<img src="img\SITEMAP_20180621_300dpi.png" id="SiteMapImg" alt="SiteMap" style="width:100%">
+	</div>
+
+	</BODY>
+	<script> 
+	
+		
+		
+		
+		
+
 		{
-			var elem = document.createElement("img");
-			elem.setAttribute("src", "img/PROCESSING.jpg");
-			elem.setAttribute("id", camera[i][0]);
-			elem.setAttribute("style", "width:10px; position:absolute; left:"+camera[i][2]*100+"%; top:"+camera[i][3]*100+"%");
-			elem.setAttribute("alt", "Camera");
-			document.getElementById("SiteMap").appendChild(elem);
+			var siteMapImg = document.getElementById("SiteMapImg");
+			var siteMapContainer = document.getElementById("SiteMap")
+			siteMapImg.onerror = function () 
+			{
+				siteMapImg.setAttribute("style","display:none");
+				this.src = ""; // place your error.png image instead
+			};
+			siteMapImg.onload = function ()
+			{
+				for(var i = 0 ;i<camera.length; i++)
+				{
+					siteMapImg.setAttribute("style","");
+					var elem = document.createElement("img");
+					elem.setAttribute("src", "img/PROCESSING.jpg");
+					elem.setAttribute("id", camera[i][0]);
+					elem.setAttribute("style", "width:10px; position:absolute; left:"+camera[i][2]*100+"%; top:"+camera[i][3]*100+"%");
+					elem.setAttribute("alt", "Camera");
+					document.getElementById("SiteMap").appendChild(elem);
+				};			
+			};
 		};
+		
+
 
 		
 		
 		
 		
 		build_table(camera);
-		var timeout = 6000;
+		//var timeout = 6000;
 		//var camera_icon;
 		//for(int i=0; i<iplist.length;i++)
 		//{
@@ -566,10 +602,7 @@
 
 	
 		
-		for(var i =0; i<camera.length; i++)
-		{
-			test_ip(camera[i][0], timeout, camera[i].delay, ip_response);
-		};
+
 	
 
 		/*var a = new XMLHttpRequest();
