@@ -9,6 +9,7 @@
 		var offsety = 230;
 		
 		const camera = [
+			["192.168.1.102", 	"0",	0,0,"TEST"],
 			["10.45.16.94", 	"1",	0,0,"NW corner	Dome	SNP-6321H	Back Box - Light Bracket	Security	"],
 			["10.45.18.135", 	"2",	0,0,"North wall (west side)	Dome	XNF-8010 RV	Back Box - Light Bracket	Security	"],
 			["10.45.24.89", 	"4",	0,0,"00:09:18:4e:ad:37		360	XNF-8010 RV		Security	"],
@@ -412,11 +413,7 @@
 			["127.0.0.1", "511",0,0,"M4 Tender 		Dome	XNV-6011			M4 Tender - Above the side-by-side takeaway on M4, pointed to Tender position with view of rollers too"],
 			["127.0.0.1", "512",0,0,"M6 Tender 		Dome	XNV-6011			M6 Tender - Above the side-by-side takeaway on M6, pointed to Tender position with view of rollers too"],
 			["127.0.0.1", "513",0,0,"AF1 OTE		360	XNF-8010 RV			AF1 OTE - Slightly west of the middle of the AF1 OTE belt"]
-
-		
-		
-		
-
+			
 		];
 </script>
 <script>
@@ -448,8 +445,8 @@
 		var myTable = document.getElementById("IP_Status_Table");
 		var overlayIcon = document.getElementById(ip);
 		//console.log(overlayIcon);
-		var pass = Math.abs(document.getElementById("goodTimeOut").innerHTML-return_delay);
-		var fail = Math.abs(document.getElementById("badTimeOut").innerHTML-return_delay);
+		var pass = Math.abs(0-return_delay);
+		var fail = Math.abs(timeout-return_delay);
 		console.log(return_delay, pass, fail);
 		if(myTable != null)
 		{
@@ -486,8 +483,22 @@
 			dataType: "json",
 			timeout: timeout});
 	};
+	
+	
+	function test_ip_two(ip, timeout, return_delay, timestart, callback){
+		//var timestart = new Date().getTime();
+		$.ajax({ 
+			url: "https://"+ip,
+			data: timestart,
+			error: function(request, error){
+				return_delay = (new Date().getTime())-timestart;
+				callback(ip, timeout, return_delay);
+			},
+			dataType: "json",
+			timeout: timeout});
+	};
 
-	function sequencegood(ip, timeout, return_delay)
+	/*function sequencegood(ip, timeout, return_delay)
 	{
 
 		var goodIP = document.getElementById("goodIP").value;
@@ -503,10 +514,10 @@
 		{
 			test_ip(camera[i][0], 20000, camera[i].delay, ip_response);
 		};		
-	};	
+	};*/	
 	
 
-	function refreshData(camera)
+	/*function refreshData(camera)
 	{
 		var goodIP = document.getElementById("goodIP").value;
 		var badIP = document.getElementById("badIP").value;
@@ -515,7 +526,7 @@
 		test_ip(badIP, 60000, return_delay2, sequencebad);
 
 		
-	};
+	};*/
 	
 </script>	
 
@@ -545,9 +556,9 @@
 
 
 	Site Map Camera Health<br>
-	<button onclick="refreshData(camera)">Refresh</button><br>
+	<!--<button onclick="refreshData(camera)">Refresh</button><br>
 	Known Good IP:&nbsp<input type="text" name="Good IP" id="goodIP" value="127.0.0.1">&nbsp<div id="goodTimeOut">100</div><br>
-	Known Bad IP :&nbsp<input type="text" name="Bad IP" id="badIP" value="10.45.16.254">&nbsp<div id="badTimeOut">20000</div><br>
+	Known Bad IP :&nbsp<input type="text" name="Bad IP" id="badIP" value="10.45.16.254">&nbsp<div id="badTimeOut">20000</div><br>-->
 	
 		
 		
@@ -569,7 +580,8 @@
 			siteMapImg.onerror = function () 
 			{
 				siteMapImg.setAttribute("style","display:none");
-				this.src = ""; // place your error.png image instead
+				//this.src = ""; // place your error.png image instead
+				//break;
 			};
 			siteMapImg.onload = function ()
 			{
@@ -599,7 +611,11 @@
 		//{
 		//		camera[i].ip = iplist[i]
 		//}
-
+		for(var i =0; i<camera.length; i++)
+		{
+			//test_ip(camera[i][0], 20000, camera[i].delay, ip_response);
+			test_ip_two(camera[i][0], 20000, camera[i].delay, new Date().getTime(), ip_response);
+		};	
 	
 		
 
