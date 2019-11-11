@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<script>//Referenced www.towardsdatascience.com
+
+
+
+<script>
+//attempt
 var lr = 1 //learning value
 var bias = 1 //value of bias
 var weights = [Math.random(), Math.random(), Math.random()] //weights generated in a list (3 weights in total for 2 neurons and the bias)
@@ -8,6 +12,40 @@ var weights = [Math.random(), Math.random(), Math.random()] //weights generated 
   //return Math.floor(Math.random() * Math.floor(max));
 //}
 //console.log(getRandomInt(3));
+
+var networkTest;
+networkTest.numInputs = 2;
+networkTest.numOutputs = 1;
+networkTest.numHiddenLayers = 0;
+networkTest.bias = 1;//value of bias
+networkTest.lr = 1;//learning value
+networkTest.weights = [Math.random(), Math.random(), Math.random()];//input1, input2, bias
+
+function buildNetwork(numInputs, numOutputs, numHiddenLayers, weights, lr, bias)
+{
+
+	var weights;//Static array of weight for each branch
+	var neuralNetwork;//variable for storing the neuralNetwork, needs to evolve as a class outside this
+	var hiddenLayerWidth = 0;//default no hidden layers
+	
+	if(numInputs>numOutputs) hiddenLayerWidth=numInputs; //define width of hidden layers as the maximum for inputs or outputs so as to be able to define a static array, this may be able to change later 
+	else hiddenLayerWidth=numOutputs;
+	
+	//test with no hidden layers, two inputs and one output to test against perceptron
+	numInputs = 2;
+	numOutputs = 1;
+	numHiddenLayers = 0;
+	weights = [Math.random(), Math.random(), Math.random()];
+};
+
+
+function networkTrain(neuralNetwork, input, expectedOutput)
+{
+	var error = output - outputP;
+	weights[0] += error * input1 * lr;
+	weights[1] += error * input2 * lr;
+	weights[2] += error * bias * lr;
+};
 
 
 function Perceptron(input1, input2, output)
@@ -32,7 +70,7 @@ function Perceptron(input1, input2, output)
 	
 	
 
-}
+};
 
 function Learning()
 {
@@ -45,6 +83,31 @@ function Learning()
 		console.log(weights[0], weights[1], weights[2]);
 	}
 }
+/*
+function networkAction(network, inputs, outputs)
+{
+	var width = 0;
+	if(network.numInputs>network.numOutputs) width = network.numInputs;
+	else width = network.numOutputs;
+	width+=1;//add one for bias
+	
+	var tempArray[];
+	//zero out fields in tempArray, there has got to be a better wayvar
+	for(var i = 0; i<width; i++) tempArray[i] = 0;
+	
+	for(var i =0; i<=network.numHiddenLayers;i++)
+	{
+		for(var j=0; j<width;j++)
+		{
+			weights	tempArray[]
+		};weights[0] += error * input1 * lr;
+		weights[1] += error * input2 * lr;
+		weights[2] += error * bias * lr;
+	};
+	
+	
+	
+};*/
 
 
 </script>
