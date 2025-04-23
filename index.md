@@ -8,6 +8,7 @@
 		<A HREF="Neural_Network_Simple/index.html">Neural_Network_Simple</A><BR>
 		<A HREF="Neural_Network_Deep/index.html">Neural_Network_Deep</A><BR> -->
 		<A HREF="prefect/index.html">Experimenting with WebGL</A>
+		<A HREF="JSModuleTest/JSModuleTest.html">Testing Javascript import/export</A>
 	</body>
 </html>
 
