@@ -1,40 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Modules Example</title>
-</head>
-<body>
-    test
-    <script type="module" src="app.js"></script>
-    test2
-    <canvas id="c"></canvas>
-    <script type="text/javascript">
-        var canvas = document.getElementById("c");
-        var gl = canvas.getContext("webgl");
-        gl.clearColor(1.0, 0.0, 0.0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        // main.js
-        //  import { add } from './module.js';
-        //  console.log(add(2, 3)); // Output: 5
-    </script>
-        <h1>Answers</h1>
-        <h2><strong id="x"></strong> and <strong id="y"></strong></h2>
-    
-        <h3>Addition</h3>
-        <p id="addition"></p>
-    
-        <h3>Subtraction</h3>
-        <p id="subtraction"></p>
-    
-        <h3>Multiplication</h3>
-        <p id="multiplication"></p>
-    
-        <h3>Division</h3>
-        <p id="division"></p>
-        <script type="module" src="functions.js"></script>
-
-        <h3>test import</h3>
-        <p id="test import"></p>
-<script type="module" src="script.js"></script>
-</body>
+    test0
+  <head>
+    <meta charset="utf-8" />
+    <title>WebGL Demo</title>
+    <script src='./glMatrix/gl-matrix.js'></script>
+    <script src='./webgl-demo.js' type="module"></script>
+    <script src='./events.js' type="module"></script>
+  </head>
+  test1
+  <body>
+    <canvas id='Layout' width='480' height='480'></canvas>
+    <table id="outside">
+        <tr>
+          <td id="t1">one</td>
+        </tr>
+        <tr>
+          <td id="t2">two</td>
+        </tr>
+      </table>
+  </body>
+  test2
 </html>
