@@ -4,6 +4,7 @@ import { initShaderProgram } from './shader.js';
 
 let cubeRotation = 0.0;
 let deltaTime = 0;
+const entities = [];
 // will set to true when video can be copied to texture
 let copyVideo = false;
 
@@ -26,9 +27,9 @@ function main() {
   }
   
   // Set clear color to black, fully opaque
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  //gl.clearColor(0.0, 0.0, 0.0, 1.0);
   // Clear the color buffer with specified clear color
-  gl.clear(gl.COLOR_BUFFER_BIT);
+ // gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Initialize a shader program; this is where all the lighting
   // for the vertices and so forth is established.
@@ -39,20 +40,17 @@ function main() {
   // for aVertexPosition, aVertexColor and also
   // look up uniform locations.
   const programInfo = {
-    program: shaderProgram,
+    program: shaderProgram[0],
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-      vertexNormal: gl.getAttribLocation(shaderProgram, "aVertexNormal"),
-      textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
+      vertexPosition: gl.getAttribLocation(shaderProgram[0], "aVertexPosition"),
+      vertexNormal: gl.getAttribLocation(shaderProgram[0], "aVertexNormal"),
+      textureCoord: gl.getAttribLocation(shaderProgram[0], "aTextureCoord"),
     },
     uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(
-        shaderProgram,
-        "uProjectionMatrix"
-      ),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
-      normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
-      uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
+      projectionMatrix: gl.getUniformLocation(shaderProgram[0],"uProjectionMatrix"),
+      modelViewMatrix: gl.getUniformLocation(shaderProgram[0], "uModelViewMatrix"),
+      normalMatrix: gl.getUniformLocation(shaderProgram[0], "uNormalMatrix"),
+      uSampler: gl.getUniformLocation(shaderProgram[0], "uSampler"),
     },
   };
 
@@ -64,9 +62,9 @@ function main() {
   const video = 0;//setupVideo("Firefox.mp4");
 
   // Flip image pixels into the bottom-to-top order that WebGL expects.
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
- 
+ naiveEntitySetup;
 
   // Draw the scene repeatedly
   let then = 0;
@@ -75,11 +73,11 @@ function main() {
     deltaTime = now - then;
     then = now;
 
-    if (copyVideo) {
-      updateTexture(gl, texture, video);
-    }
+ //   if (copyVideo) {
+ //     updateTexture(gl, texture, video);
+ //   }
 
-    drawScene(gl, programInfo, buffers, texture, cubeRotation);
+    drawScene(gl, programInfo, buffers, texture, cubeRotation, entities);
     cubeRotation += deltaTime;
 
     requestAnimationFrame(render);
@@ -87,6 +85,24 @@ function main() {
 
   requestAnimationFrame(render);
 }
+
+function naiveEntitySetup()
+{
+    entities.push(entity(ASSET[0], 1, [0,0,0]));
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

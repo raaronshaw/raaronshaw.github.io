@@ -1,15 +1,13 @@
 import {mat4} from './glMatrix/index.js';
+import {drawEntity} from './drawEntity.js';
 
-function drawScene(gl, programInfo, buffers, texture, cubeRotation) {
+function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
   
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
     gl.enable(gl.DEPTH_TEST); // Enable depth testing
     gl.depthFunc(gl.LEQUAL); // Near things obscure far things
-  
-    // Clear the canvas before we start drawing on it.
-  
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Clear the canvas before we start drawing on it.
   
     // Create a perspective matrix, a special matrix that is
     // used to simulate the distortion of perspective in a camera.
@@ -23,7 +21,25 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation) {
     const zNear = 0.1;
     const zFar = 100.0;
     const projectionMatrix = mat4.create();
-  
+    
+    /*var fovy = 67.0;
+    var aspect = canvas.width / canvas.height;
+    var near_clip = 0.1;
+    var fov_rad = fovy * (2.0 * Math.PI) / 360.0;//ONE_DEG_IN_RAD;
+    var range = Math.tan(fov_rad / 2.0) * near_clip;
+    var sx = (2.0 * near_clip) / (range * aspect + range * aspect);
+    var sy = near_clip / range;
+    var sz = -(far_clip + near_clip) / (far_clip - near_clip);
+    var pz = -(2.0 * far_clip * near_clip) / (far_clip - near_clip);
+    Matrix_Projection = [sx, 0, 0, 0,
+                            0, sy, 0, 0,
+                            0, 0, sz, -1.0,
+                            0, 0, pz, 0];
+    Matrix_View = [1, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1];
+*/
     // note: glmatrix.js always has the first argument
     // as the destination to receive the result.
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
@@ -109,6 +125,8 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation) {
       const offset = 0;
       gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
+
+    //drawEntity(gl, projectionMatrix, viewMatrix, entities[0]);
   }
   
   // Tell WebGL how to pull out the positions from the position
