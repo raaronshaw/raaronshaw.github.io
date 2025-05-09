@@ -7,7 +7,6 @@ let cubeRotation = 0.0;
 let deltaTime = 0;
 const entities = [];
 // will set to true when video can be copied to texture
-let copyVideo = false;
 
 main();
 
@@ -26,7 +25,11 @@ function main() {
     );
     return;
   }
-  
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
+  gl.enable(gl.DEPTH_TEST); // Enable depth testing
+  gl.depthFunc(gl.LEQUAL); // Near things obscure far things
+
   // Set clear color to black, fully opaque
   //gl.clearColor(0.0, 0.0, 0.0, 1.0);
   // Clear the color buffer with specified clear color
@@ -41,17 +44,17 @@ function main() {
   // for aVertexPosition, aVertexColor and also
   // look up uniform locations.
   const programInfo = {
-    program: shaderProgram[0],
+    program: shaderProgram,
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram[0], "aVertexPosition"),
-      vertexNormal: gl.getAttribLocation(shaderProgram[0], "aVertexNormal"),
-      textureCoord: gl.getAttribLocation(shaderProgram[0], "aTextureCoord"),
+      vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+      vertexNormal: gl.getAttribLocation(shaderProgram, "aVertexNormal"),
+      textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
     },
     uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(shaderProgram[0],"uProjectionMatrix"),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram[0], "uModelViewMatrix"),
-      normalMatrix: gl.getUniformLocation(shaderProgram[0], "uNormalMatrix"),
-      uSampler: gl.getUniformLocation(shaderProgram[0], "uSampler"),
+      projectionMatrix: gl.getUniformLocation(shaderProgram,"uProjectionMatrix"),
+      modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
+      normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
+      uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
     },
   };
   console.log(programInfo.uniformLocations.projectionMatrix);
@@ -66,7 +69,7 @@ function main() {
   // Flip image pixels into the bottom-to-top order that WebGL expects.
   //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
- naiveEntitySetup(shaderProgram);
+ naiveEntitySetup();
 
   // Draw the scene repeatedly
   let then = 0;
@@ -88,7 +91,7 @@ function main() {
   requestAnimationFrame(render);
 }
 
-function naiveEntitySetup(shaderProgram)
+function naiveEntitySetup()
 {
     //ASSET, shader, pos
     entities.push(new entity(0, 0, [-1.0,-1.0,-8.0]));

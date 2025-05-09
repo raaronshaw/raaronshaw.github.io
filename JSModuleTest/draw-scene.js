@@ -6,8 +6,7 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
   
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
-    gl.enable(gl.DEPTH_TEST); // Enable depth testing
-    gl.depthFunc(gl.LEQUAL); // Near things obscure far things
+
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Clear the canvas before we start drawing on it.
   
     // Create a perspective matrix, a special matrix that is
@@ -79,7 +78,7 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
     const normalMatrix = mat4.create();
     mat4.invert(normalMatrix, modelViewMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
-  
+  //console.log(normalMatrix);
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute.
     setPositionAttribute(gl, buffers, programInfo);
@@ -110,16 +109,7 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
       false,
       normalMatrix
     );
-  
-    // Tell WebGL we want to affect texture unit 0
-   // gl.activeTexture(gl.TEXTURE0);
-  
-    // Bind the texture to texture unit 0
-   // gl.bindTexture(gl.TEXTURE_2D, texture);
-  
-    // Tell the shader we bound the texture to texture unit 0
-   // gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
-  
+
     {
       const vertexCount = 36;
       const type = gl.UNSIGNED_SHORT;
@@ -127,8 +117,9 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
      gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
     let viewMatrix = modelViewMatrix;
-    
-    drawEntity(gl, projectionMatrix, viewMatrix, entities[0]);
+    let batchskip = 0;//use in future for rubber stamping same object multiple times to skip VP/VC buffer binds. Reformat drawEntity loop for assets
+    for(let i = 0; i<entities.length ; i++)
+      drawEntity(gl, projectionMatrix, viewMatrix, entities[i], batchskip);
   }
   
   // Tell WebGL how to pull out the positions from the position
