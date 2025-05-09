@@ -1,4 +1,19 @@
 //glsl vertex shader
+export const shaderAttributesTest = {
+  aVertexPosition : 0,
+  aVertexNormals : 0,
+  uKd : 0,
+  uMatrixView : 0,
+  uMatrixProjection : 0,
+  uMatrixModel : 0
+};
+
+export var shaderCustom = 0;
+
+
+
+
+
 const vsSource = `
   attribute vec4 aVertexPosition;
   attribute vec3 aVertexNormal;
@@ -66,11 +81,11 @@ function initShaderProgram(gl){//}, vsSource, fsSource) {
       return null;
     }
     {
-        shaderProgramme.aVertexPosition = gl.getAttribLocation(shaderProgramme, "aVertexPosition");
+       // shaderProgramme.aVertexPosition = gl.getAttribLocation(shaderProgramme, "aVertexPosition");
         //gl.enableVertexAttribArray(shaderProgramme.vertexPositionAttribute);
-        shaderProgramme.aVertexNormals = gl.getAttribLocation(shaderProgramme, "aVertexNormals");
+        //shaderProgramme.aVertexNormals = gl.getAttribLocation(shaderProgramme, "aVertexNormals");
         //gl.enableVertexAttribArray(shaderProgramme.vertexNormalsAttribute);
-        shaderProgramme.aTextureCoord = gl.getAttribLocation(shaderProgramme, "aTextureCoord");
+        //shaderProgramme.aTextureCoord = gl.getAttribLocation(shaderProgramme, "aTextureCoord");
 
       //  shaderProgramme.Kd = gl.getUniformLocation(shaderProgramme, "Kd");
        // shaderProgramme.Matrix_View_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_View");
@@ -204,25 +219,52 @@ function naiveShader (gl)
     let shaderProgramme = 0;
     {//test triangle
         shaderProgramme = gl.createProgram();
+        shaderCustom = gl.createProgram();
+///////////////
         gl.attachShader(shaderProgramme, vertexShader);
         gl.attachShader(shaderProgramme, fragmentShader);
         gl.linkProgram(shaderProgramme);
 
+        gl.attachShader(shaderCustom, vertexShader);
+        gl.attachShader(shaderCustom, fragmentShader);
+        gl.linkProgram(shaderCustom);
+///////////
         if (!gl.getProgramParameter(shaderProgramme, gl.LINK_STATUS)) {
             alert("Could not initialise shaders");
         }
 
-        shaderProgramme.vertexPositionAttribute = gl.getAttribLocation(shaderProgramme, "aVertexPosition");
-        gl.enableVertexAttribArray(shaderProgramme.vertexPositionAttribute);
+        if (!gl.getProgramParameter(shaderCustom, gl.LINK_STATUS)) {
+          alert("Could not initialise shaders");
+        }
+///////////////
+        //shaderProgramme.vertexPositionAttribute = gl.getAttribLocation(shaderProgramme, "aVertexPosition");
+        shaderAttributesTest.aVertexPosition = gl.getAttribLocation(shaderCustom, "aVertexPosition");
 
-        shaderProgramme.vertexNormalsAttribute = gl.getAttribLocation(shaderProgramme, "aVertexNormals");
-        gl.enableVertexAttribArray(shaderProgramme.vertexNormalsAttribute);
+        //gl.enableVertexAttribArray(shaderProgramme.vertexPosition);
+        gl.enableVertexAttribArray(shaderAttributesTest.aVertexPosition);
+//////////////////////
+       // shaderProgramme.vertexNormalsAttribute = gl.getAttribLocation(shaderProgramme, "aVertexNormals");
+        shaderAttributesTest.aVertexNormals = gl.getAttribLocation(shaderCustom, "aVertexNormals");
 
-        shaderProgramme.Kd = gl.getUniformLocation(shaderProgramme, "Kd");
-        shaderProgramme.Matrix_View_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_View");
-        shaderProgramme.Matrix_Projection_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_Projection");
-        shaderProgramme.Matrix_Model_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_Model");
+        gl.enableVertexAttribArray(shaderCustom.vertexNormalsAttribute);
+        gl.enableVertexAttribArray(shaderAttributesTest.aVertexNormals);
+//////////
+        //shaderProgramme.Kd = gl.getUniformLocation(shaderProgramme, "Kd");
+        shaderAttributesTest.uKd = gl.getUniformLocation(shaderCustom, "Kd");
+        //shaderProgramme.Matrix_View_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_View");
+        shaderAttributesTest.uMatrixView = gl.getUniformLocation(shaderCustom, "Matrix_View");
+        //shaderProgramme.Matrix_Projection_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_Projection");
+        shaderAttributesTest.uMatrixProjection = gl.getUniformLocation(shaderCustom, "Matrix_Projection");
+        console.log(shaderAttributesTest.uMatrixProjection);
+        //shaderProgramme.Matrix_Model_Uniform = gl.getUniformLocation(shaderProgramme, "Matrix_Model");
+        shaderAttributesTest.uMatrixModel =  gl.getUniformLocation(shaderCustom, "Matrix_Model");
+        
     }
+    //console.log("shader.js");
+    //console.log(shaderProgramme);
+    //console.log(shaderCustom);
+    //console.log(shaderAttributesTest);
+
     return shaderProgramme;
 
 }

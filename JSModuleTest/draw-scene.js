@@ -1,5 +1,6 @@
 import {mat4} from './glMatrix/index.js';
 import {drawEntity} from './drawEntity.js';
+import {entity} from './entity.js'
 
 function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
   
@@ -53,7 +54,7 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
     mat4.translate(
       modelViewMatrix, // destination matrix
       modelViewMatrix, // matrix to translate
-      [-0.0, 0.0, -6.0]
+      [-0.0, 0.0, -10.0]
     ); // amount to translate
   
     mat4.rotate(
@@ -111,22 +112,23 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
     );
   
     // Tell WebGL we want to affect texture unit 0
-    gl.activeTexture(gl.TEXTURE0);
+   // gl.activeTexture(gl.TEXTURE0);
   
     // Bind the texture to texture unit 0
-    gl.bindTexture(gl.TEXTURE_2D, texture);
+   // gl.bindTexture(gl.TEXTURE_2D, texture);
   
     // Tell the shader we bound the texture to texture unit 0
-    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+   // gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
   
     {
       const vertexCount = 36;
       const type = gl.UNSIGNED_SHORT;
       const offset = 0;
-      gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+     gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
-
-    //drawEntity(gl, projectionMatrix, viewMatrix, entities[0]);
+    let viewMatrix = modelViewMatrix;
+    
+    drawEntity(gl, projectionMatrix, viewMatrix, entities[0]);
   }
   
   // Tell WebGL how to pull out the positions from the position

@@ -1,7 +1,8 @@
 import { initBuffers } from './init-buffers.js';
 import { drawScene } from './draw-scene.js';
 import { initShaderProgram } from './shader.js';
-
+import { entity } from './entity.js';
+import { ASSETS } from './init-buffers.js';
 let cubeRotation = 0.0;
 let deltaTime = 0;
 const entities = [];
@@ -53,6 +54,7 @@ function main() {
       uSampler: gl.getUniformLocation(shaderProgram[0], "uSampler"),
     },
   };
+  console.log(programInfo.uniformLocations.projectionMatrix);
 
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
@@ -64,7 +66,7 @@ function main() {
   // Flip image pixels into the bottom-to-top order that WebGL expects.
   //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
- naiveEntitySetup;
+ naiveEntitySetup(shaderProgram);
 
   // Draw the scene repeatedly
   let then = 0;
@@ -86,9 +88,10 @@ function main() {
   requestAnimationFrame(render);
 }
 
-function naiveEntitySetup()
+function naiveEntitySetup(shaderProgram)
 {
-    entities.push(entity(ASSET[0], 1, [0,0,0]));
+    //ASSET, shader, pos
+    entities.push(new entity(0, 0, [-1.0,-1.0,-8.0]));
 
 }
 
