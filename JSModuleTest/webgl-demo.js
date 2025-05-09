@@ -3,9 +3,12 @@ import { drawScene } from './draw-scene.js';
 import { initShaderProgram } from './shader.js';
 import { entity } from './entity.js';
 import { ASSETS } from './init-buffers.js';
+import { mat4} from './glMatrix/index.js';
+import { startCanvasEvents} from './events.js';
 let cubeRotation = 0.0;
 let deltaTime = 0;
-const entities = [];
+export let viewMatrix = mat4.create();
+export let entities = [];
 // will set to true when video can be copied to texture
 
 main();
@@ -57,7 +60,7 @@ function main() {
       uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
     },
   };
-  console.log(programInfo.uniformLocations.projectionMatrix);
+ 
 
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
@@ -69,7 +72,9 @@ function main() {
   // Flip image pixels into the bottom-to-top order that WebGL expects.
   //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
- naiveEntitySetup();
+  naiveEntitySetup();
+  //const viewMatrix = mat4.create();
+  startCanvasEvents(viewMatrix, entities);
 
   // Draw the scene repeatedly
   let then = 0;
@@ -82,7 +87,7 @@ function main() {
  //     updateTexture(gl, texture, video);
  //   }
 
-    drawScene(gl, programInfo, buffers, texture, cubeRotation, entities);
+    drawScene(gl, programInfo, buffers, texture, cubeRotation, entities, viewMatrix);
     cubeRotation += deltaTime;
 
     requestAnimationFrame(render);

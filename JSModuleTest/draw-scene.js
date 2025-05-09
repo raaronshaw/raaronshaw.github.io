@@ -2,7 +2,7 @@ import {mat4} from './glMatrix/index.js';
 import {drawEntity} from './drawEntity.js';
 import {entity} from './entity.js'
 
-function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
+function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities, viewMatrix) {
   
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
@@ -116,7 +116,7 @@ function drawScene(gl, programInfo, buffers, texture, cubeRotation, entities) {
       const offset = 0;
      gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
-    let viewMatrix = modelViewMatrix;
+    let vviewMatrix = modelViewMatrix;
     let batchskip = 0;//use in future for rubber stamping same object multiple times to skip VP/VC buffer binds. Reformat drawEntity loop for assets
     for(let i = 0; i<entities.length ; i++)
       drawEntity(gl, projectionMatrix, viewMatrix, entities[i], batchskip);

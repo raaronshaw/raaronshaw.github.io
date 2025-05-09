@@ -18,7 +18,7 @@ function drawEntity(gl, projectionMatrix, viewMatrix, entity, batchskip)
     if(batchskip==0)
     {
         gl.uniformMatrix4fv(shader[index].uMatrixProjection, false, projectionMatrix);
-        gl.uniformMatrix4fv(shader[index].uMatrixView, false, mat4.create());
+        gl.uniformMatrix4fv(shader[index].uMatrixView, false, viewMatrix);
         gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[entity.assetIndex].VP_Buffer);
         gl.vertexAttribPointer(shader[index].aVertexPosition, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[entity.assetIndex].VC_Buffer);
