@@ -1,8 +1,9 @@
 import {entities, viewMatrix} from './webgl-demo.js';
-import {mat4, vec3} from './glMatrix/index.js';
+import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
 let m_orientation = [1.0, 0.0, 0.0, 0.0];
 let m_eye = [0.0, 0.0, 0.0];
 let WORLD_YAXIS = [0.0, 1.0, 0.0];
+var WORLD_XAXIS = [1.0, 0.0, 0.0];
 let m_xAxis = [1.0, 0.0, 0.0];
 let m_yAxis = [0.0, 1.0, 0.0];
 let m_zAxis = [0.0, 0.0, 1.0];
@@ -17,10 +18,203 @@ function modifyText() {
   // Add event listener to table
  document.getElementById("outside").addEventListener("click", modifyText, false);
  
+ function degToRad(degrees) {
+        return degrees * Math.PI / 180;
+    }
  export function startCanvasEvents(entities)
  {
   document.getElementById("Layout").addEventListener("click", move, false);
+  document.addEventListener("keypress", handleKeyPress, false);
+  document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /* show a custom context menu*/ });
+  document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
+   document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
+  document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
  }
+  /*element.onmousedown = function(eventData) {
+  if (eventData.button === 0) {
+      alert("From JS: the (left?) button is down!")
+  }
+}*/
+   // document.addEventListener("keypress", (Event) => {
+    //  console.log("keypressed");
+   // });
+        //document.onmouseup = handleMouseUp;
+        //document.aonmousemove = handleMouseMove;
+        //document.onkeypress = handleKeyPress;
+ let mouseRightDown = false;
+ //let mousePos = [0,0];
+ let mousePos = {x:0,y:0};
+ function mouseDown(event)
+ {
+  if(event.button==2)
+  {
+    mouseRightDown = true;
+    mousePos = {x:event.clientX, y:event.clientY};
+  }
+  else mouseRightDown = false;
+ }
+function mouseUp(event)
+ {
+  if(event.button==2)
+  {
+    mouseRightDown = false;
+    mousePos = {x:event.clientX, y:event.clientY};
+  }
+  //else mouseRightDown = false;
+ }
+
+
+
+function mouseMove(event)
+{
+  let deltaX = event.clientX - mousePos.x;
+  let deltaY = event.clientY - mousePos.y
+  mousePos = {x:event.clientX, y:event.clientY};
+
+  if(mouseRightDown)
+  {
+    let heading = deltaX;
+    let pitch = deltaY;
+    if (heading != 0.0) {
+      mat4.rotate(viewMatrix, viewMatrix, degToRad(heading), [0.0, 1.0, 0.0]);
+    }
+    if (pitch != 0.0) {
+      mat4.rotate(viewMatrix, viewMatrix, degToRad(pitch), [1.0, 0.0, 0.0]);
+    }
+  }  
+}
+
+function handleMouseDown(event) {
+        mouseDown = true;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+    }
+
+    function handleMouseUp(event) {
+        mouseDown = false;
+    }
+
+    var direction = vec3.create();
+    function handleKeyPress(e) {
+        var keyPressed = e.code;
+        let testdirection = vec4.create();
+        let deltaDirection = 0.1;
+        let deltaMovement = 0;
+        if (keyPressed == 'KeyA')//a
+        {
+            direction = [-10, 0, 0];w
+            
+        }
+        else if (keyPressed == 'KeyD')//d
+        {
+            direction = [10, 0, 0];
+        }
+        else if (keyPressed == 'KeyS')//s
+        {
+            direction = [0, 0, -10];
+        }
+        else if (keyPressed == 'KeyW')//w
+        {
+            let tempmat = mat4.create();
+            m_eye[0]+=viewMatrix[2]*deltaDirection; 
+            m_eye[1]+=viewMatrix[6]*deltaDirection;
+            m_eye[2]+=viewMatrix[10]*deltaDirection;
+            
+            let trans = mat4.create();
+            trans[3] =viewMatrix[2]*deltaDirection; 
+            trans[7] =viewMatrix[6]*deltaDirection;
+            trans[11]=viewMatrix[10]*deltaDirection;
+            
+
+            viewMatrix[2] =viewMatrix[2]*deltaDirection; 
+            viewMatrix[6] =viewMatrix[6]*deltaDirection;
+            viewMatrix[10]=viewMatrix[10]*deltaDirection;
+mat4.multiply(viewMatrix, viewMatrix, trans);
+            //mat4.invert(tempmat, viewMatrix);
+            //mat4.transpose(viewMatrix, tempmat);
+
+            //testdirection = [viewMatrix[2], viewMatrix[6], viewMatrix[10], viewMatrix[14]];
+            //vec4.normalize(testdirection, testdirection);
+            //testdirection[3] = testdirection[3]+1;
+            //viewMatrix[10]--;//=viewMatrix[0]+1;
+            return;
+        }
+        else if (keyPressed == 'KeyR')//r
+        {
+            direction = [0, 10, 0];
+        }
+        else if (keyPressed == 'KeyF')//f
+        {
+            direction = [0, -10, 0];
+        }
+        else if (keyPressed == 'KeyZ')//z
+        {
+            vec3.copy(z_eye, m_eye);
+            direction = [0, 0, 0];
+        }
+        else direction = [0, 0, 0];
+
+        var forwards = vec3.create();
+        forwards = vec3.cross(forwards, WORLD_YAXIS, m_xAxis);
+        vec3.normalize(forwards, forwards);
+        var eye = vec3.create();
+        vec3.copy(eye, m_eye);
+        vec3.scaleAndAdd(eye, eye, m_xAxis, direction[0]);
+        vec3.scaleAndAdd(eye, eye, WORLD_YAXIS, direction[1]);
+        vec3.scaleAndAdd(eye, eye, forwards, direction[2]);
+        vec3.copy(m_eye, eye);
+
+        //BEGIN UPDATE VIEW MATRIX//
+        mat4.fromQuat(viewMatrix, [m_orientation[1], m_orientation[2], m_orientation[3], m_orientation[0]]);
+        m_xAxis = [viewMatrix[0], viewMatrix[4], viewMatrix[8]];
+        m_yAxis = [viewMatrix[1], viewMatrix[5], viewMatrix[9]];
+        m_zAxis = [viewMatrix[2], viewMatrix[6], viewMatrix[10]];
+        m_viewDir = -m_zAxis;
+        viewMatrix[12] = -vec3.dot(m_xAxis, m_eye);
+        viewMatrix[13] = -vec3.dot(m_yAxis, m_eye);
+        viewMatrix[14] = -vec3.dot(m_zAxis, m_eye);
+        //END UPDATE VIEW MATRIX//
+        return;
+    }
+
+    function handleMouseMove(event) {
+        if (!mouseDown) {
+            return;
+        }
+        var newX = event.clientX;
+        var newY = event.clientY;
+        var heading = newX - lastMouseX;
+        var pitch = newY - lastMouseY;
+
+        if (heading != 0.0) {
+            var rot = quat.create();
+            quat.setAxisAngle(rot, WORLD_YAXIS, degToRad(heading));
+            rot = [rot[3], rot[0], rot[1], rot[2]];
+            m_orientation = quat.product(rot, m_orientation);
+        }
+        if (pitch != 0.0) {
+            var rot = quat.create();
+            quat.setAxisAngle(rot, WORLD_XAXIS, degToRad(pitch));
+            rot = [rot[3], rot[0], rot[1], rot[2]];
+            m_orientation = quat.product(m_orientation, rot);
+        }
+
+        //BEGIN UPDATE VIEW MATRIX//
+        mat4.fromQuat(Matrix_View, [m_orientation[1], m_orientation[2], m_orientation[3], m_orientation[0]]);
+        m_xAxis = [Matrix_View[0], Matrix_View[4], Matrix_View[8]];
+        m_yAxis = [Matrix_View[1], Matrix_View[5], Matrix_View[9]];
+        m_zAxis = [Matrix_View[2], Matrix_View[6], Matrix_View[10]];
+        m_viewDir = -m_zAxis;
+        Matrix_View[12] = -vec3.dot(m_xAxis, m_eye);
+        Matrix_View[13] = -vec3.dot(m_yAxis, m_eye);
+        Matrix_View[14] = -vec3.dot(m_zAxis, m_eye);
+        //END UPDATE VIEW MATRIX//
+        //mouse.move to lastMouseX, lastMouseY instead of below stuff
+
+        lastMouseX = newX
+        lastMouseY = newY;
+
+    }
 
  function move()
  {
