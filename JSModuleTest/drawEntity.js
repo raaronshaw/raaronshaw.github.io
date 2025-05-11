@@ -8,13 +8,13 @@ function drawEntity(gl, projectionMatrix, viewMatrix, entity, batchskip)
     gl.useProgram(shader[index].program);
 
     let rate = 0.01;
-    mat4.rotate(
+  /*  mat4.rotate(
         entity.translationMatrix, // destination matrix
         entity.translationMatrix, // matrix to rotate
         rate, // amount to rotate in radians
         [0.3, 0.7, 1.0]
       ); // axis to rotate around (Z)
-  
+  */
     if(batchskip==0)
     {
         gl.uniformMatrix4fv(shader[index].uMatrixProjection, false, projectionMatrix);

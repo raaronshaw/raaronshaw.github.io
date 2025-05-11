@@ -57,6 +57,9 @@ function modifyText() {
     //vewMatrix
   }
   else mouseRightDown = false;
+
+  
+
  }
 function mouseUp(event)
  {
@@ -68,7 +71,10 @@ function mouseUp(event)
   //else mouseRightDown = false;
  }
 
-
+  let first = 2;
+  let second = 6;
+  let third = 10;
+  let fourth = 14;
 
 function mouseMove(event)
 {
@@ -102,6 +108,20 @@ function mouseMove(event)
       mat4.multiply(viewMatrix, T, R);
     }
   }  
+
+
+  //const mat4 inverted = glm::inverse(transformationMatrix);
+//const vec3 forward = normalize(glm::vec3(inverted[2]));
+
+//normalize(glm::vec3(camera.GetViewMatrix()[2]))*vec3(1 , 1 ,-1)
+  let testdirection = vec4.create();
+
+  vec4.normalize(testdirection, [viewMatrix[first], viewMatrix[second], viewMatrix[third], viewMatrix[fourth]]);
+  
+  document.getElementById("t3").firstChild.nodeValue = `${testdirection[0].toFixed(2)}, ${testdirection[1].toFixed(2)}, ${testdirection[2].toFixed(2)}, ${testdirection[3].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+  document.getElementById("t3").firstChild.nodeValue = `${viewMatrix[first].toFixed(2)}, ${viewMatrix[second].toFixed(2)}, ${viewMatrix[third].toFixed(2)}, ${viewMatrix[fourth].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+
+
 }
 
 function handleMouseDown(event) {
@@ -120,25 +140,40 @@ function handleMouseDown(event) {
       var keyPressed = e.code;
       let cam_speed = 1;//deltaDirection = 0.1;
       let cam_moved = 0;
+      let movement_direction = vec3.create();
       if (keyPressed == 'KeyA')//a
       {
-        m_eye[0] -= cam_speed * 0.1;//elapsed_seconds;
+        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
+        m_eye[0] -= movement_direction[0]; 
+        m_eye[1] -= movement_direction[1]; 
+        m_eye[2] += movement_direction[2]; 
         cam_moved = true;
       }
       else if (keyPressed == 'KeyD')//d
       {
-        m_eye[0] += cam_speed * 0.1;//elapsed_seconds;
+        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
+        m_eye[0] += movement_direction[0]; 
+        m_eye[1] += movement_direction[1]; 
+        m_eye[2] -= movement_direction[2]; 
         cam_moved = true;
       }
       else if (keyPressed == 'KeyS')//s
       {
-        m_eye[2] += cam_speed * 0.1;//elapsed_seconds;
+        vec3.normalize(movement_direction, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
+        m_eye[0] -= movement_direction[0]; 
+        m_eye[1] -= movement_direction[1]; 
+        m_eye[2] += movement_direction[2]; 
         cam_moved = true;
           // direction = [0, 0, -10];
       }
       else if (keyPressed == 'KeyW')//w
       {
-        m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
+        //let forwmovement_directionard = vec3.create();
+        vec3.normalize(movement_direction, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
+        m_eye[0] += movement_direction[0]; 
+        m_eye[1] += movement_direction[1]; 
+        m_eye[2] -= movement_direction[2]; 
+        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
         cam_moved = true;
       }
       else if (keyPressed == 'KeyR')//r
