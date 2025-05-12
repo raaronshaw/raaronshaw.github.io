@@ -1,17 +1,13 @@
 import {entities, viewMatrix} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
-let m_orientation = [1.0, 0.0, 0.0, 0.0];
-let m_eye = [0.0, 0.0, 0.0];
-let WORLD_YAXIS = [0.0, 1.0, 0.0];
-var WORLD_XAXIS = [1.0, 0.0, 0.0];
-let m_xAxis = [1.0, 0.0, 0.0];
-let m_yAxis = [0.0, 1.0, 0.0];
-let m_zAxis = [0.0, 0.0, 1.0];
-let m_viewDir = [0.0, 0.0, -1.0];
-let cam_yaw = 0;
-let test_orientation = quat.create();
+
+let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
+
+let camera_orientation = quat.create();
 let speed_turn = 0.5;
 let speed_move = 0.5;
+ let mouseRightDown = false;
+ let mousePos = {x:0,y:0};
 
 function modifyText() {
     const t2 = document.getElementById("t2");
@@ -27,36 +23,21 @@ function modifyText() {
     }
  export function startCanvasEvents(entities)
  {
-  //quat q (angle, x, y, z);
-  //quat(test_orientation= quat(0.0, 0.0, 0.0, 0.0);
-  document.getElementById("Layout").addEventListener("click", move, false);
-  document.addEventListener("keypress", handleKeyPress, false);
-  document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /* show a custom context menu*/ });
-  document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
-   document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
-  document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
+    document.getElementById("Layout").addEventListener("click", move, false);
+    document.addEventListener("keypress", handleKeyPress, false);
+    document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
+    document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
+    document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
+    document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
  }
-  /*element.onmousedown = function(eventData) {
-  if (eventData.button === 0) {
-      alert("From JS: the (left?) button is down!")
-  }
-}*/
-   // document.addEventListener("keypress", (Event) => {
-    //  console.log("keypressed");
-   // });
-        //document.onmouseup = handleMouseUp;
-        //document.aonmousemove = handleMouseMove;
-        //document.onkeypress = handleKeyPress;
- let mouseRightDown = false;
- //let mousePos = [0,0];
- let mousePos = {x:0,y:0};
+
+
  function mouseDown(event)
  {
   if(event.button==2)
   {
     mouseRightDown = true;
     mousePos = {x:event.clientX, y:event.clientY};
-    //vewMatrix
   }
   else mouseRightDown = false;
 
@@ -74,12 +55,7 @@ function mouseUp(event)
   //else mouseRightDown = false;
  }
 
-  let first = 2;
-  let second = 6;
-  let third = 10;
-  let fourth = 14;
- let test_heading = 0;
- let test_pitch = 0;
+
 function mouseMove(event)
 {
   let deltaHeading = event.clientX - mousePos.x;
@@ -88,17 +64,15 @@ function mouseMove(event)
 
   if(mouseRightDown)
   {
-    //let deltaHeading = deltaX;
-    //let deltaPitch = deltaY;
     if (deltaHeading != 0.0) {
       deltaHeading*=speed_turn;
       let deltaquat = quat.create();
       let T = mat4.create();
       let R = mat4.create();
       quat.setAxisAngle(deltaquat, [0.0,1.0,0.0], degToRad(deltaHeading));
-      quat.multiply(test_orientation, test_orientation, deltaquat);
-      mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
-      mat4.fromQuat(R, test_orientation);
+      quat.multiply(camera_orientation, camera_orientation, deltaquat);
+      mat4.fromQuat(R, camera_orientation);
+      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
       mat4.multiply(viewMatrix, R, T);
     }
     if (deltaPitch != 0.0) { 
@@ -109,27 +83,14 @@ function mouseMove(event)
       let rightvector = vec3.create();
       vec3.normalize(rightvector, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
       quat.setAxisAngle(deltaquat, rightvector, degToRad(deltaPitch));
-      quat.multiply(test_orientation, test_orientation, deltaquat);
-      mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
-      mat4.fromQuat(R, test_orientation);
+      quat.multiply(camera_orientation, camera_orientation, deltaquat);
+      mat4.fromQuat(R, camera_orientation);
+      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
       mat4.multiply(viewMatrix, R, T);
     }
   }  
 
-/*
-If you maintain a "current orientation" quaternion for your aircraft, then you can use it to work out which way the "forward", "right", and "up" vectors for it are currently facing. It you want to pitch by 10 degrees, then just use the "right" vector as the axis input to a versor, and 10 degrees as your angle. If you multiply your "current orientation" by the new versor then you have your pitched result. Much less painful!
-
-*/
-  //const mat4 inverted = glm::inverse(transformationMatrix);
-//const vec3 forward = normalize(glm::vec3(inverted[2]));
-
-//normalize(glm::vec3(camera.GetViewMatrix()[2]))*vec3(1 , 1 ,-1)
-  let testdirection = vec3.create();
-
-  vec3.normalize(testdirection, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
-  
-  document.getElementById("t3").firstChild.nodeValue = `${testdirection[0].toFixed(2)}, ${testdirection[1].toFixed(2)}, ${testdirection[2].toFixed(2)}`;//, ${testdirection[3].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
-  document.getElementById("t4").firstChild.nodeValue = `${m_eye[0].toFixed(2)}, ${m_eye[1].toFixed(2)}, ${m_eye[2].toFixed(2)}, ${0}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+ document.getElementById("t4").firstChild.nodeValue = `${camera_position[0].toFixed(2)}, ${camera_position[1].toFixed(2)}, ${camera_position[2].toFixed(2)}, ${0}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
 
 
 }
@@ -144,64 +105,53 @@ function handleMouseDown(event) {
         mouseDown = false;
     }
 
-    var direction = vec3.create();
+
     function handleKeyPress(e) 
     {
-      document.getElementById("t4").firstChild.nodeValue = `${m_eye[0].toFixed(2)}, ${m_eye[1].toFixed(2)}, ${m_eye[2].toFixed(2)}, ${0}`;
-      var keyPressed = e.code;
-      let cam_speed = 1;//deltaDirection = 0.1;
+     
+      let keyPressed = e.code;
       let cam_moved = 0;
       let movement_direction = vec3.create();
       if (keyPressed == 'KeyA')//a
       {
-        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
-        m_eye[0] -= movement_direction[0]; 
-        m_eye[1] -= movement_direction[1]; 
-        m_eye[2] -= movement_direction[2]; 
+        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.subtract(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyD')//d
       {
         vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
-        m_eye[0] += movement_direction[0]; 
-        m_eye[1] += movement_direction[1]; 
-        m_eye[2] += movement_direction[2]; 
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.add(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyS')//s
       {
         vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
-        m_eye[0] += movement_direction[0]; 
-        m_eye[1] += movement_direction[1]; 
-        m_eye[2] += movement_direction[2]; 
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.add(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyW')//w
       {
-        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
-        m_eye[0] -= movement_direction[0]; 
-        m_eye[1] -= movement_direction[1]; 
-        m_eye[2] -= movement_direction[2]; 
+        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.subtract(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyR')//r
       {
-        //let forwmovement_directionard = vec3.create();
-        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);//, viewMatrix[fourth]]);
-        m_eye[0] += movement_direction[0]; 
-        m_eye[1] += movement_direction[1]; 
-        m_eye[2] += movement_direction[2]; 
-        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
+        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.add(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyF')//f
       {
-        //let forwmovement_directionard = vec3.create();
-        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);//, viewMatrix[fourth]]);
-        m_eye[0] -= movement_direction[0]; 
-        m_eye[1] -= movement_direction[1]; 
-        m_eye[2] -= movement_direction[2]; 
-        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
+        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+        vec3.scale(movement_direction,movement_direction,speed_move);
+        vec3.subtract(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
       else if (keyPressed == 'KeyZ')//z
@@ -209,18 +159,12 @@ function handleMouseDown(event) {
           // vec3.copy(z_eye, m_eye);
           // direction = [0, 0, 0];
       }
-      // else direction = [0, 0, 0];
       if (cam_moved) 
       { 
         let T = mat4.create();
         let R = mat4.create();
-        mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
-        mat4.fromQuat(R, test_orientation);
-        
-
-        
-        //tempvec3 = [m_eye[0], m_eye[1], m_eye[2]];
-        //mat4.fromRotationTranslation(R, test_orientation, tempvec3);
+        mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+        mat4.fromQuat(R, camera_orientation);
         mat4.multiply(viewMatrix, R, T);
       }
 
@@ -269,27 +213,6 @@ function handleMouseDown(event) {
  function move()
  {
 
-      let direction = [0, 0, 0.1];
-      var forwards = vec3.create();
-      forwards = vec3.cross(forwards, WORLD_YAXIS, m_xAxis);
-      vec3.normalize(forwards, forwards);
-      var eye = vec3.create();
-      vec3.copy(eye, m_eye);
-      vec3.scaleAndAdd(eye, eye, m_xAxis, direction[0]);
-      vec3.scaleAndAdd(eye, eye, WORLD_YAXIS, direction[1]);
-      vec3.scaleAndAdd(eye, eye, forwards, direction[2]);
-      vec3.copy(m_eye, eye);
-
-      //BEGIN UPDATE VIEW MATRIX//
-      mat4.fromQuat(viewMatrix, [m_orientation[1], m_orientation[2], m_orientation[3], m_orientation[0]]);
-      m_xAxis = [viewMatrix[0], viewMatrix[4], viewMatrix[8]];
-      m_yAxis = [viewMatrix[1], viewMatrix[5], viewMatrix[9]];
-      m_zAxis = [viewMatrix[2], viewMatrix[6], viewMatrix[10]];
-      m_viewDir = -m_zAxis;
-      viewMatrix[12] = -vec3.dot(m_xAxis, m_eye);
-      viewMatrix[13] = -vec3.dot(m_yAxis, m_eye);
-      viewMatrix[14] = -vec3.dot(m_zAxis, m_eye);
-      //END UPDATE VIEW MATRIX//
     console.log("clicked");
     console.log(viewMatrix);
 
