@@ -10,6 +10,8 @@ let m_zAxis = [0.0, 0.0, 1.0];
 let m_viewDir = [0.0, 0.0, -1.0];
 let cam_yaw = 0;
 let test_orientation = quat.create();
+let speed_turn = 0.5;
+let speed_move = 0.5;
 
 function modifyText() {
     const t2 = document.getElementById("t2");
@@ -61,6 +63,7 @@ function modifyText() {
   
 
  }
+
 function mouseUp(event)
  {
   if(event.button==2)
@@ -75,51 +78,58 @@ function mouseUp(event)
   let second = 6;
   let third = 10;
   let fourth = 14;
-
+ let test_heading = 0;
+ let test_pitch = 0;
 function mouseMove(event)
 {
-  let deltaX = event.clientX - mousePos.x;
-  let deltaY = event.clientY - mousePos.y
+  let deltaHeading = event.clientX - mousePos.x;
+  let deltaPitch = event.clientY - mousePos.y
   mousePos = {x:event.clientX, y:event.clientY};
 
   if(mouseRightDown)
   {
-    let heading = deltaX;
-    let pitch = deltaY;
-    if (heading != 0.0) {
+    //let deltaHeading = deltaX;
+    //let deltaPitch = deltaY;
+    if (deltaHeading != 0.0) {
+      deltaHeading*=speed_turn;
       let deltaquat = quat.create();
-      quat.setAxisAngle(deltaquat, [0.0,1.0,0.0], degToRad(heading));
-      quat.multiply(test_orientation, test_orientation, deltaquat);
       let T = mat4.create();
       let R = mat4.create();
+      quat.setAxisAngle(deltaquat, [0.0,1.0,0.0], degToRad(deltaHeading));
+      quat.multiply(test_orientation, test_orientation, deltaquat);
       mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
       mat4.fromQuat(R, test_orientation);
-      mat4.multiply(viewMatrix, T, R);
-      
+      mat4.multiply(viewMatrix, R, T);
     }
-    if (pitch != 0.0) {
+    if (deltaPitch != 0.0) { 
+      deltaPitch*=speed_turn;
       let deltaquat = quat.create();
-      quat.setAxisAngle(deltaquat, [1.0,0.0,0.0], degToRad(pitch));
-      quat.multiply(test_orientation, test_orientation, deltaquat);
       let T = mat4.create();
       let R = mat4.create();
+      let rightvector = vec3.create();
+      vec3.normalize(rightvector, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
+      quat.setAxisAngle(deltaquat, rightvector, degToRad(deltaPitch));
+      quat.multiply(test_orientation, test_orientation, deltaquat);
       mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
       mat4.fromQuat(R, test_orientation);
-      mat4.multiply(viewMatrix, T, R);
+      mat4.multiply(viewMatrix, R, T);
     }
   }  
 
+/*
+If you maintain a "current orientation" quaternion for your aircraft, then you can use it to work out which way the "forward", "right", and "up" vectors for it are currently facing. It you want to pitch by 10 degrees, then just use the "right" vector as the axis input to a versor, and 10 degrees as your angle. If you multiply your "current orientation" by the new versor then you have your pitched result. Much less painful!
 
+*/
   //const mat4 inverted = glm::inverse(transformationMatrix);
 //const vec3 forward = normalize(glm::vec3(inverted[2]));
 
 //normalize(glm::vec3(camera.GetViewMatrix()[2]))*vec3(1 , 1 ,-1)
-  let testdirection = vec4.create();
+  let testdirection = vec3.create();
 
-  vec4.normalize(testdirection, [viewMatrix[first], viewMatrix[second], viewMatrix[third], viewMatrix[fourth]]);
+  vec3.normalize(testdirection, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
   
-  document.getElementById("t3").firstChild.nodeValue = `${testdirection[0].toFixed(2)}, ${testdirection[1].toFixed(2)}, ${testdirection[2].toFixed(2)}, ${testdirection[3].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
-  document.getElementById("t3").firstChild.nodeValue = `${viewMatrix[first].toFixed(2)}, ${viewMatrix[second].toFixed(2)}, ${viewMatrix[third].toFixed(2)}, ${viewMatrix[fourth].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+  document.getElementById("t3").firstChild.nodeValue = `${testdirection[0].toFixed(2)}, ${testdirection[1].toFixed(2)}, ${testdirection[2].toFixed(2)}`;//, ${testdirection[3].toFixed(2)}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+  document.getElementById("t4").firstChild.nodeValue = `${m_eye[0].toFixed(2)}, ${m_eye[1].toFixed(2)}, ${m_eye[2].toFixed(2)}, ${0}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
 
 
 }
@@ -137,6 +147,7 @@ function handleMouseDown(event) {
     var direction = vec3.create();
     function handleKeyPress(e) 
     {
+      document.getElementById("t4").firstChild.nodeValue = `${m_eye[0].toFixed(2)}, ${m_eye[1].toFixed(2)}, ${m_eye[2].toFixed(2)}, ${0}`;
       var keyPressed = e.code;
       let cam_speed = 1;//deltaDirection = 0.1;
       let cam_moved = 0;
@@ -146,7 +157,7 @@ function handleMouseDown(event) {
         vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
         m_eye[0] -= movement_direction[0]; 
         m_eye[1] -= movement_direction[1]; 
-        m_eye[2] += movement_direction[2]; 
+        m_eye[2] -= movement_direction[2]; 
         cam_moved = true;
       }
       else if (keyPressed == 'KeyD')//d
@@ -154,35 +165,44 @@ function handleMouseDown(event) {
         vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
         m_eye[0] += movement_direction[0]; 
         m_eye[1] += movement_direction[1]; 
-        m_eye[2] -= movement_direction[2]; 
+        m_eye[2] += movement_direction[2]; 
         cam_moved = true;
       }
       else if (keyPressed == 'KeyS')//s
       {
-        vec3.normalize(movement_direction, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
-        m_eye[0] -= movement_direction[0]; 
-        m_eye[1] -= movement_direction[1]; 
+        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
+        m_eye[0] += movement_direction[0]; 
+        m_eye[1] += movement_direction[1]; 
         m_eye[2] += movement_direction[2]; 
         cam_moved = true;
-          // direction = [0, 0, -10];
       }
       else if (keyPressed == 'KeyW')//w
       {
-        //let forwmovement_directionard = vec3.create();
-        vec3.normalize(movement_direction, [viewMatrix[first], viewMatrix[second], viewMatrix[third]]);//, viewMatrix[fourth]]);
-        m_eye[0] += movement_direction[0]; 
-        m_eye[1] += movement_direction[1]; 
+        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
+        m_eye[0] -= movement_direction[0]; 
+        m_eye[1] -= movement_direction[1]; 
         m_eye[2] -= movement_direction[2]; 
-        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
         cam_moved = true;
       }
       else if (keyPressed == 'KeyR')//r
       {
-          // direction = [0, 10, 0];
+        //let forwmovement_directionard = vec3.create();
+        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);//, viewMatrix[fourth]]);
+        m_eye[0] += movement_direction[0]; 
+        m_eye[1] += movement_direction[1]; 
+        m_eye[2] += movement_direction[2]; 
+        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
+        cam_moved = true;
       }
       else if (keyPressed == 'KeyF')//f
       {
-          //direction = [0, -10, 0];
+        //let forwmovement_directionard = vec3.create();
+        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);//, viewMatrix[fourth]]);
+        m_eye[0] -= movement_direction[0]; 
+        m_eye[1] -= movement_direction[1]; 
+        m_eye[2] -= movement_direction[2]; 
+        //m_eye[2] -= cam_speed * 0.1;//elapsed_seconds;
+        cam_moved = true;
       }
       else if (keyPressed == 'KeyZ')//z
       {
@@ -196,7 +216,12 @@ function handleMouseDown(event) {
         let R = mat4.create();
         mat4.translate(T, mat4.create(), [-m_eye[0], -m_eye[1], -m_eye[2]]);
         mat4.fromQuat(R, test_orientation);
-        mat4.multiply(viewMatrix, T, R);
+        
+
+        
+        //tempvec3 = [m_eye[0], m_eye[1], m_eye[2]];
+        //mat4.fromRotationTranslation(R, test_orientation, tempvec3);
+        mat4.multiply(viewMatrix, R, T);
       }
 
       return;
