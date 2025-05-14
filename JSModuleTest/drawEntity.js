@@ -19,15 +19,33 @@ function drawEntity(gl, projectionMatrix, viewMatrix, entity, batchskip)
     {
         gl.uniformMatrix4fv(shader[index].uMatrixProjection, false, projectionMatrix);
         gl.uniformMatrix4fv(shader[index].uMatrixView, false, viewMatrix);
+        
+
+
         gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[entity.assetIndex].VP_Buffer);
         gl.vertexAttribPointer(shader[index].aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader[index].aVertexPosition);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[entity.assetIndex].VC_Buffer);
         gl.vertexAttribPointer(shader[index].aVertexNormals, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader[index].aVertexNormals);
+        
+        gl.uniform3fv(shader[index].uKd, entity.Kd);//color
+        gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[entity.assetIndex].TC_Buffer);
+        gl.vertexAttribPointer(shader[index].aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(shader[index].aTextureCoord);
+
+        if(entity.texture==0)
+          gl.bindTexture(gl.TEXTURE_2D, null);
+        else
+          gl.bindTexture(gl.TEXTURE_2D, entity.texture);
+        
+        
     }
 
 
-    gl.uniformMatrix4fv(shader[index].uMatrixModel, false, entity.translationMatrix);
-    gl.uniform3fv(shader[index].Kd, [0.2, 0.2, 0.9]);//color
+    gl.uniformMatrix4fv(shader[index].uMatrixModel, false, entity.transformationMatrix);//translationMatrix);
+
     gl.drawArrays(gl.TRIANGLES, 0, ASSETS[entity.assetIndex].numItems);
 }
 

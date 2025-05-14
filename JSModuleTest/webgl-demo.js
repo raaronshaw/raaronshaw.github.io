@@ -1,15 +1,16 @@
 import { initBuffers } from './init-buffers.js';
 import { drawScene } from './draw-scene.js';
 import { initShaderProgram } from './shader.js';
-import { entity } from './entity.js';
+import { entity, entities } from './entity.js';
 import { ASSETS } from './init-buffers.js';
 import { mat4} from './glMatrix/index.js';
 import { startCanvasEvents} from './events.js';
+import { naiveGUISetup } from './GUIPanels.js';
 let cubeRotation = 0.0;
 let deltaTime = 0;
 export let viewMatrix = mat4.create();
-export let entities = [];
-// will set to true when video can be copied to texture
+
+
 
 main();
 
@@ -33,48 +34,14 @@ function main() {
   gl.enable(gl.DEPTH_TEST); // Enable depth testing
   gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
-  // Set clear color to black, fully opaque
-  //gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  // Clear the color buffer with specified clear color
- // gl.clear(gl.COLOR_BUFFER_BIT);
+  const shaderProgram = initShaderProgram(gl);
 
-  // Initialize a shader program; this is where all the lighting
-  // for the vertices and so forth is established.
-  const shaderProgram = initShaderProgram(gl);//, vsSource, fsSource);
-
-  // Collect all the info needed to use the shader program.
-  // Look up which attributes our shader program is using
-  // for aVertexPosition, aVertexColor and also
-  // look up uniform locations.
-  const programInfo = {
-    program: shaderProgram,
-    attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-      vertexNormal: gl.getAttribLocation(shaderProgram, "aVertexNormal"),
-      textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
-    },
-    uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(shaderProgram,"uProjectionMatrix"),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
-      normalMatrix: gl.getUniformLocation(shaderProgram, "uNormalMatrix"),
-      uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
-    },
-  };
- 
-
-  // Here's where we call the routine that builds all the
-  // objects we'll be drawing.
   const buffers = initBuffers(gl);
-
-  const texture = initTexture(gl);
-  const video = 0;//setupVideo("Firefox.mp4");
-
-  // Flip image pixels into the bottom-to-top order that WebGL expects.
-  //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
-  naiveEntitySetup();
-  //const viewMatrix = mat4.create();
-  startCanvasEvents(viewMatrix, entities);
+  
+  naiveEntitySetup(gl);
+  naiveGUISetup(gl);
+  
+  startCanvasEvents(entities, gl);
 
   // Draw the scene repeatedly
   let then = 0;
@@ -83,30 +50,109 @@ function main() {
     deltaTime = now - then;
     then = now;
 
- //   if (copyVideo) {
- //     updateTexture(gl, texture, video);
- //   }
-
-    drawScene(gl, programInfo, buffers, texture, cubeRotation, entities, viewMatrix);
-    cubeRotation += deltaTime;
-
+    drawScene(gl, entities, viewMatrix);
+    RotateFirstCube(entities, deltaTime);
     requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
 }
 
-function naiveEntitySetup()
+
+function RotateFirstCube(entities, deltaTime)
 {
-    //ASSET, shader, pos
-    entities.push(new entity(0, 0, [-1.0,0.0,-8.0]));
-    entities.push(new entity(0, 0, [-5.0, 0.0,-5.0]));
-    entities.push(new entity(0, 0, [-10.0,0.0,-10.0]));
+  let speed = 1.0;
+  let R = entities[0].rotationMatrix;
+  mat4.rotate(R, R, deltaTime*speed, [0, 0, 1]); 
+  mat4.rotate(R, R, deltaTime*speed * 0.7, [0, 1, 0]); 
+  mat4.rotate(R, R, deltaTime*speed * 0.3, [1, 0, 0]); 
+  entities[0].setRotationMatrix(R);
+
+  
+  //setRotationMatrix();
 
 }
 
 
+function naiveEntitySetup(gl)
+{
+    //ASSET, shader, pos, color, texture
+    let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
+    entities.push(new entity(0, 0, [-10.0, -10.0, -50.0], texture));
+    texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
+    entities.push(new entity(0, 0, [-10.0,  -5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [-10.0,   0.0, -50.0], texture));
+    entities.push(new entity(0, 0, [-10.0,   5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [-10.0,  10.0, -50.0], texture));
 
+    entities.push(new entity(0, 0, [ -5.0, -10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ -5.0,  -5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ -5.0,   0.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ -5.0,   5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ -5.0,  10.0, -50.0], texture));
+
+    entities.push(new entity(0, 0, [  0.0, -10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  0.0,  -5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  0.0,   0.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  0.0,   5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  0.0,  10.0, -50.0], texture));
+
+    entities.push(new entity(0, 0, [  5.0, -10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  5.0,  -5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  5.0,   0.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  5.0,   5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [  5.0,  10.0, -50.0], texture));
+
+    entities.push(new entity(0, 0, [ 10.0, -10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ 10.0,  -5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ 10.0,   0.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ 10.0,   5.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ 10.0,  10.0, -50.0], texture));
+    
+    //texture = loadTexture(gl, [1.0,  0.5,  1.0], "./test_image.png");
+    //entities.push(new entity(1, 1, [0.0,  0.0, -10.0], texture));
+
+}
+
+function loadTexture(gl, defaultcolor, url) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,new Uint8Array(
+    [defaultcolor[0]*255, defaultcolor[1]*255, defaultcolor[2]*255, 255]
+  ));
+
+  if(url!=0)
+  {
+    const image = new Image();
+    image.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+      // WebGL1 has different requirements for power of 2 images
+      // vs. non power of 2 images so check if the image is a
+      // power of 2 in both dimensions.
+      if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+        // Yes, it's a power of 2. Generate mips.
+        gl.generateMipmap(gl.TEXTURE_2D);
+      } else {
+        // No, it's not a power of 2. Turn off mips and set
+        // wrapping to clamp to edge
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      }
+    };
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    image.src = url;
+  }
+
+  return texture;
+}
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) === 0;
+}
 
 
 

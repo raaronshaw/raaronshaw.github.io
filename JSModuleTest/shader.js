@@ -1,4 +1,5 @@
-import {my_glsl_fs_str, my_glsl_vs_str, my_glsl_vsSource, my_glsl_fsSource } from "./glslSrc.js";
+import {my_glsl_fs_str, my_glsl_vs_str, my_glsl_vsSource, my_glsl_fsSource, my_GUI_glsl_fs_str, my_GUI_glsl_vs_str } from "./glslSrc.js";
+import {my_Mouse_Pick_glsl_fs_str, my_Mouse_Pick_glsl_vs_str } from "./glslSrc.js";
 export const shaderAttributesTest = {
   aVertexPosition : 0,
   aVertexNormals : 0,
@@ -21,22 +22,31 @@ class shaderClass {
     gl.enableVertexAttribArray(this.aVertexPosition);
     this.aVertexNormals = gl.getAttribLocation(program, "aVertexNormals");
     gl.enableVertexAttribArray(this.aVertexNormals);
-    this.uKd = gl.getUniformLocation(program, "Kd");
+    this.uKd = gl.getUniformLocation(program, "uKd");
     this.uMatrixView = gl.getUniformLocation(program, "Matrix_View");
     this.uMatrixProjection = gl.getUniformLocation(program, "Matrix_Projection");
-    this.uMatrixModel =  gl.getUniformLocation(program, "Matrix_Model");  
+    this.uMatrixModel =  gl.getUniformLocation(program, "Matrix_Model");
+    this.aTextureCoord = gl.getAttribLocation(program, "aTextureCoord");
+    this.uSampler = gl.getUniformLocation(program, "uSampler");
   }
 };
 
-
-
+    
 
 
 //const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
 
 function initShaderProgram(gl){//}, vsSource, fsSource) {
     let shaderProgramme = initProgram(gl, my_glsl_vsSource, my_glsl_fsSource);
+    
+    //0
     shader.push(new shaderClass(gl, initProgram(gl, my_glsl_vs_str, my_glsl_fs_str)));
+
+    //1
+    shader.push(new shaderClass(gl, initProgram(gl, my_GUI_glsl_vs_str, my_GUI_glsl_fs_str)));
+
+    //2
+    shader.push(new shaderClass(gl, initProgram(gl, my_Mouse_Pick_glsl_vs_str, my_Mouse_Pick_glsl_fs_str)));
     //shader.push(initProgram());
     //shader.push(new shaderClass(gl, initProgram(gl,)));
     return shaderProgramme;
@@ -61,7 +71,7 @@ function loadShader(gl, type, source) {
   
 
     
-function initProgram(gl, vertexShaderSrc, fragmentShaderSrc)
+export function initProgram(gl, vertexShaderSrc, fragmentShaderSrc)
 {
   const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexShaderSrc);
   const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSrc);

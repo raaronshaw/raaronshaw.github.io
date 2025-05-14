@@ -1,13 +1,14 @@
-import {entities, viewMatrix} from './webgl-demo.js';
+import {viewMatrix} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
+//import {entities} from './entity.js';
 
 let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
 let camera_orientation = quat.create();
 let speed_turn = 0.5;
 let speed_move = 0.5;
- let mouseRightDown = false;
- let mousePos = {x:0,y:0};
+let mouseRightDown = false;
+let mousePos = {x:0,y:0};
 
 function modifyText() {
     const t2 = document.getElementById("t2");
@@ -19,11 +20,17 @@ function modifyText() {
  document.getElementById("outside").addEventListener("click", modifyText, false);
  
  function degToRad(degrees) {
-        return degrees * Math.PI / 180;
-    }
- export function startCanvasEvents(entities)
+        return degrees * Math.PI / 180;   
+      }
+ export function startCanvasEvents(entities, gl)
  {
-    document.getElementById("Layout").addEventListener("click", move, false);
+    let fb = initializeColorBasedMousePicking(gl);
+    document.getElementById("Layout").addEventListener("click", (event)=> { 
+      let pixels = new Uint8Array(1 * 1 * 4,);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.readPixels (event.clientX, gl.drawingBufferHeight - event.clientY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      document.getElementById("t4").firstChild.nodeValue = `${pixels[0].toFixed(2)}, ${pixels[1].toFixed(2)}, ${pixels[2].toFixed(2)}, ${pixels[3].toFixed(2)}`;
+      clicktest(event)});
     document.addEventListener("keypress", handleKeyPress, false);
     document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
     document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
@@ -31,6 +38,52 @@ function modifyText() {
     document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
  }
 
+
+ function initializeColorBasedMousePicking(gl)
+ {
+  // create framebuffer 
+  let fb = gl.createFramebuffer();
+  // // attach depth texture to fb so that depth-sorting works 
+  //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); 
+  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
+  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+  // // attach depth texture to framebuffer glFramebufferTexture2D (   GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_tex, 0); 
+  // // create texture to use for rendering second pass GLuint fb_tex = 0; glGenTextures (1, &fb_tex); glBindTexture (GL_TEXTURE_2D, fb_tex); 
+  // // make the texture the same size as the viewport glTexImage2D (   GL_TEXTURE_2D,   0,   GL_RGBA,   width,   height,   0,   GL_RGBA,   GL_UNSIGNED_BYTE,   NULL ); 
+  // // textures will not work properly if you don't set up parameters glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  let depth_texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, depth_texture);
+  const data = null;
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
+                gl.canvas.clientWidth, gl.canvas.clientHeight, 0,
+                gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
+  let fb_texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, fb_texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
+                gl.canvas.clientWidth, gl.canvas.clientHeight, 0,
+                gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb_texture, 0);
+  //let draw_bufs = { GL_COLOR_ATTACHMENT0 }; 
+  //glDrawBuffers (1, draw_bufs); // bind default fb (number 0) so that we render normally next time glBindFramebuffer (GL_FRAMEBUFFER, 0);
+
+
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);//unbind the created framebuffer
+  return fb;
+ }
 
  function mouseDown(event)
  {
@@ -90,7 +143,7 @@ function mouseMove(event)
     }
   }  
 
- document.getElementById("t4").firstChild.nodeValue = `${camera_position[0].toFixed(2)}, ${camera_position[1].toFixed(2)}, ${camera_position[2].toFixed(2)}, ${0}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
+ //document.getElementById("t4").firstChild.nodeValue = `${camera_position[0].toFixed(2)}, ${camera_position[1].toFixed(2)}, ${camera_position[2].toFixed(2)}, ${0}`;//"" + viewMatrix[2].toFixed(2) + "" + 2;
 
 
 }
@@ -210,6 +263,10 @@ function handleMouseDown(event) {
 
     }
 
+    function clicktest(event)
+    {
+
+    }
  function move()
  {
 
