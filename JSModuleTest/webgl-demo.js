@@ -4,10 +4,13 @@ import { initShaderProgram } from './shader.js';
 import { entity, entities } from './entity.js';
 import { ASSETS } from './init-buffers.js';
 import { mat4} from './glMatrix/index.js';
-import { startCanvasEvents} from './events.js';
+import { startCanvasEvents, fb} from './events.js';
 import { naiveGUISetup } from './GUIPanels.js';
+import {shader } from './shader.js';
+import { vec3} from './glMatrix/index.js';
 let cubeRotation = 0.0;
 let deltaTime = 0;
+export let defaultColor = vec3.fromValues(0.4, 0.4, 0.4);
 export let viewMatrix = mat4.create();
 
 
@@ -41,7 +44,7 @@ function main() {
   naiveEntitySetup(gl);
   naiveGUISetup(gl);
   
-  startCanvasEvents(entities, gl);
+  let fbb = startCanvasEvents(entities, gl);
 
   // Draw the scene repeatedly
   let then = 0;
@@ -51,11 +54,18 @@ function main() {
     then = now;
 
     drawScene(gl, entities, viewMatrix);
+    colorPicker(gl, shader[2], fbb);
+
     RotateFirstCube(entities, deltaTime);
     requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
+}
+
+function colorPicker(gl, shaderProgramme, fbb)
+{
+  
 }
 
 
@@ -76,26 +86,28 @@ function RotateFirstCube(entities, deltaTime)
 
 function naiveEntitySetup(gl)
 {
+    
     //ASSET, shader, pos, color, texture
     let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
-    entities.push(new entity(0, 0, [-10.0, -10.0, -50.0], texture));
-    texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
-    entities.push(new entity(0, 0, [-10.0,  -5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [-10.0,   0.0, -50.0], texture));
-    entities.push(new entity(0, 0, [-10.0,   5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [-10.0,  10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
+   
+    entities.push(new entity(0, 0, [-10.0,  -5.0, -50.0], 0, defaultColor));
+    //entities.push(new entity(0, 0, [-10.0,   0.0, -50.0], texture));
+     texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
+    entities.push(new entity(0, 0, [-10.0,   5.0, -50.0], 0, defaultColor));
+    entities.push(new entity(0, 0, [-10.0,  10.0, -50.0], 0, defaultColor));
 
-    entities.push(new entity(0, 0, [ -5.0, -10.0, -50.0], texture));
-    entities.push(new entity(0, 0, [ -5.0,  -5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [ -5.0,   0.0, -50.0], texture));
-    entities.push(new entity(0, 0, [ -5.0,   5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [ -5.0,  10.0, -50.0], texture));
-
+    entities.push(new entity(0, 0, [ -5.0, -10.0, -50.0], 0, defaultColor));
+    entities.push(new entity(0, 0, [ -5.0,  -5.0, -50.0], 0, defaultColor));
+    entities.push(new entity(0, 0, [ -5.0,   0.0, -50.0], 0, defaultColor));
+    entities.push(new entity(0, 0, [ -5.0,   5.0, -50.0], 0, defaultColor));
+    entities.push(new entity(0, 0, [ -5.0,  10.0, -50.0], 0, defaultColor));
+/*
     entities.push(new entity(0, 0, [  0.0, -10.0, -50.0], texture));
     entities.push(new entity(0, 0, [  0.0,  -5.0, -50.0], texture));
     entities.push(new entity(0, 0, [  0.0,   0.0, -50.0], texture));
     entities.push(new entity(0, 0, [  0.0,   5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [  0.0,  10.0, -50.0], texture));
+    //entities.push(new entity(0, 0, [  0.0,  10.0, -50.0], texture));
 
     entities.push(new entity(0, 0, [  5.0, -10.0, -50.0], texture));
     entities.push(new entity(0, 0, [  5.0,  -5.0, -50.0], texture));
@@ -107,14 +119,14 @@ function naiveEntitySetup(gl)
     entities.push(new entity(0, 0, [ 10.0,  -5.0, -50.0], texture));
     entities.push(new entity(0, 0, [ 10.0,   0.0, -50.0], texture));
     entities.push(new entity(0, 0, [ 10.0,   5.0, -50.0], texture));
-    entities.push(new entity(0, 0, [ 10.0,  10.0, -50.0], texture));
+    entities.push(new entity(0, 0, [ 10.0,  10.0, -50.0], texture));*/
     
     //texture = loadTexture(gl, [1.0,  0.5,  1.0], "./test_image.png");
     //entities.push(new entity(1, 1, [0.0,  0.0, -10.0], texture));
 
 }
 
-function loadTexture(gl, defaultcolor, url) {
+export function loadTexture(gl, defaultcolor, url) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 

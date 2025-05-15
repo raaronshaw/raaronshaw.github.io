@@ -1,6 +1,8 @@
 import {viewMatrix} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
-//import {entities} from './entity.js';
+import {entities, entity} from './entity.js';
+import {loadTexture, defaultColor} from './webgl-demo.js';
+
 
 let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
@@ -9,6 +11,7 @@ let speed_turn = 0.5;
 let speed_move = 0.5;
 let mouseRightDown = false;
 let mousePos = {x:0,y:0};
+export let debug_colours = 0;
 
 function modifyText() {
     const t2 = document.getElementById("t2");
@@ -24,37 +27,31 @@ function modifyText() {
       }
  export function startCanvasEvents(entities, gl)
  {
-    let fb = initializeColorBasedMousePicking(gl);
+    let fbb = initializeColorBasedMousePicking(gl);
     document.getElementById("Layout").addEventListener("click", (event)=> { 
-      let pixels = new Uint8Array(1 * 1 * 4,);
+      
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      
+      clicktest(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      gl.readPixels (event.clientX, gl.drawingBufferHeight - event.clientY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      document.getElementById("t4").firstChild.nodeValue = `${pixels[0].toFixed(2)}, ${pixels[1].toFixed(2)}, ${pixels[2].toFixed(2)}, ${pixels[3].toFixed(2)}`;
-      clicktest(event)});
+      });
     document.addEventListener("keypress", handleKeyPress, false);
     document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
     document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
     document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
     document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
+    return fbb;
  }
 
-
+ export let fb = 0;
+export let fb_texture = 0;
  function initializeColorBasedMousePicking(gl)
  {
   // create framebuffer 
-  let fb = gl.createFramebuffer();
-  // // attach depth texture to fb so that depth-sorting works 
-  //glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); 
-  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
-  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
-  // glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
-  // // attach depth texture to framebuffer glFramebufferTexture2D (   GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_tex, 0); 
-  // // create texture to use for rendering second pass GLuint fb_tex = 0; glGenTextures (1, &fb_tex); glBindTexture (GL_TEXTURE_2D, fb_tex); 
-  // // make the texture the same size as the viewport glTexImage2D (   GL_TEXTURE_2D,   0,   GL_RGBA,   width,   height,   0,   GL_RGBA,   GL_UNSIGNED_BYTE,   NULL ); 
-  // // textures will not work properly if you don't set up parameters glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
-  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  fb = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+ 
+ /* Use if renderbuffer becomes depreciated
   let depth_texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, depth_texture);
   const data = null;
@@ -66,7 +63,16 @@ function modifyText() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
-  let fb_texture = gl.createTexture();
+*/
+// create a depth renderbuffer
+  let depthBuffer = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+ 
+  // make a depth buffer and the same size as the targetTexture
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, gl.canvas.clientWidth, gl.canvas.clientHeight);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+  fb_texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, fb_texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
                 gl.canvas.clientWidth, gl.canvas.clientHeight, 0,
@@ -76,10 +82,6 @@ function modifyText() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb_texture, 0);
-  //let draw_bufs = { GL_COLOR_ATTACHMENT0 }; 
-  //glDrawBuffers (1, draw_bufs); // bind default fb (number 0) so that we render normally next time glBindFramebuffer (GL_FRAMEBUFFER, 0);
-
-
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);//unbind the created framebuffer
   return fb;
@@ -207,10 +209,11 @@ function handleMouseDown(event) {
         vec3.subtract(camera_position, camera_position, movement_direction);
         cam_moved = true;
       }
-      else if (keyPressed == 'KeyZ')//z
+      else if (keyPressed == 'KeyP')//p
       {
-          // vec3.copy(z_eye, m_eye);
-          // direction = [0, 0, 0];
+          if(debug_colours)
+            debug_colours = 0;
+          else debug_colours = 1;
       }
       if (cam_moved) 
       { 
@@ -263,10 +266,21 @@ function handleMouseDown(event) {
 
     }
 
-    function clicktest(event)
-    {
 
-    }
+    
+function clicktest(gl, event)
+{
+  let pixels = new Uint8Array(1 * 1 * 4,);
+  gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
+  document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
+  for(let i = 0; i<entities.length ; i++)
+    entities[i].Kd = defaultColor;
+  if(index>0)
+    entities[index-1].Kd = [0.0,1.0,0.0];
+    
+      
+}
  function move()
  {
 

@@ -1,5 +1,6 @@
 import {my_glsl_fs_str, my_glsl_vs_str, my_glsl_vsSource, my_glsl_fsSource, my_GUI_glsl_fs_str, my_GUI_glsl_vs_str } from "./glslSrc.js";
 import {my_Mouse_Pick_glsl_fs_str, my_Mouse_Pick_glsl_vs_str } from "./glslSrc.js";
+import {my_temp_glsl_fs_str, my_temp_glsl_vs_str } from "./glslSrc.js";
 export const shaderAttributesTest = {
   aVertexPosition : 0,
   aVertexNormals : 0,
@@ -9,7 +10,7 @@ export const shaderAttributesTest = {
   uMatrixModel : 0
 };
 
-export var shaderCustom = 0;
+
 export const shader = [];
 
 
@@ -22,11 +23,13 @@ class shaderClass {
     gl.enableVertexAttribArray(this.aVertexPosition);
     this.aVertexNormals = gl.getAttribLocation(program, "aVertexNormals");
     gl.enableVertexAttribArray(this.aVertexNormals);
+    this.aTextureCoord = gl.getAttribLocation(program, "aTextureCoord");
+    //gl.enableVertexAttribArray(this.aTextureCoord);
     this.uKd = gl.getUniformLocation(program, "uKd");
     this.uMatrixView = gl.getUniformLocation(program, "Matrix_View");
     this.uMatrixProjection = gl.getUniformLocation(program, "Matrix_Projection");
     this.uMatrixModel =  gl.getUniformLocation(program, "Matrix_Model");
-    this.aTextureCoord = gl.getAttribLocation(program, "aTextureCoord");
+
     this.uSampler = gl.getUniformLocation(program, "uSampler");
   }
 };
@@ -46,7 +49,12 @@ function initShaderProgram(gl){//}, vsSource, fsSource) {
     shader.push(new shaderClass(gl, initProgram(gl, my_GUI_glsl_vs_str, my_GUI_glsl_fs_str)));
 
     //2
+    //shader.push(new shaderClass(gl, initProgram(gl, my_glsl_vs_str, my_glsl_fs_str)));
     shader.push(new shaderClass(gl, initProgram(gl, my_Mouse_Pick_glsl_vs_str, my_Mouse_Pick_glsl_fs_str)));
+
+    //3
+    shader.push(new shaderClass(gl, initProgram(gl, my_temp_glsl_vs_str, my_temp_glsl_fs_str)));
+
     //shader.push(initProgram());
     //shader.push(new shaderClass(gl, initProgram(gl,)));
     return shaderProgramme;

@@ -2,14 +2,17 @@ import {mat4, vec3, mat3} from './glMatrix/index.js';
 
 export let entities = [];
 
+let counter = 1;
 export class entity  {
     constructor(assetIndex, shaderIndex, position, texture, Kd) {
+        this.uid = counter++;
+        
         if(assetIndex == undefined) this.assetIndex = 0;
         else this.assetIndex = assetIndex;
         if(shaderIndex == undefined) this.shaderIndex = 0; 
         else this.shaderIndex = shaderIndex;
         
-        if(Kd == undefined) this.Kd = [0.2, 0.2, 0.2];
+        if(Kd == undefined) this.Kd = [0.7, 0.2, 0.2];
         else this.Kd = Kd;
         
         this.translationMatrix = mat4.create();
@@ -21,6 +24,7 @@ export class entity  {
         if (texture == undefined) this.texture = 0;
         else this.texture = texture;
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+        //console.log(this.uid);
     }
 
     setTranslationMatrix(position){
