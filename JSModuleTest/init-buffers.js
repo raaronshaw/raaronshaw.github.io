@@ -6,8 +6,12 @@ function initBuffers(gl) {
 
 export const ASSETS = [];
 
-function setupAssets(gl){
+export const model = {
+  Cube: 0,
+  Square: 1
+};
 
+function setupAssets(gl){
 let VP, VC, TC, num = 0;
 {//Cube Data
   VP = [

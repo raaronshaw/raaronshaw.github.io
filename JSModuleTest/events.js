@@ -1,7 +1,7 @@
 import {viewMatrix} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
-import {entities, entity} from './entity.js';
-import {loadTexture, defaultColor} from './webgl-demo.js';
+import {components, component} from './entity.js';
+import {trains, loadTexture, defaultColor} from './webgl-demo.js';
 
 
 let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
@@ -274,10 +274,24 @@ function clicktest(gl, event)
   gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
   document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
-  for(let i = 0; i<entities.length ; i++)
-    entities[i].Kd = defaultColor;
+  for(let i = 0; i<components.length ; i++)
+    components[i].Kd = defaultColor;
   if(index>0)
-    entities[index-1].Kd = [0.0,1.0,0.0];
+    components[index-1].Kd = [0.0,1.0,0.0];
+  for(let i = 0; i<trains.length ; i++)
+    trains[i].setColor(defaultColor);
+  if(index>0)
+  {
+    for(let i = 0; i<trains.length; i++)
+    {
+      for(let j =0; j<trains[i].children.length;j++)
+      {
+        if((index)==trains[i].children[j].uid)
+          trains[i].setColor([0.0,1.0,0.0]);
+      }
+
+    }
+  }
     
       
 }

@@ -2,8 +2,10 @@ import {mat4} from './glMatrix/index.js';
 import {drawEntity, drawTexturedEntity, drawEntityToFramebuffer} from './drawEntity.js';
 import {fb, debug_colours} from './events.js';
 //import {entity} from './entity.js'
+import {shader} from './shader.js';
+import {trains} from './webgl-demo.js';
 
-function drawScene(gl, entities, viewMatrix) {
+function drawScene(gl, components, viewMatrix) {
   //gl.bindBuffer()
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
@@ -29,18 +31,27 @@ function drawScene(gl, entities, viewMatrix) {
    
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     let batchskip = 0;//use in future for rubber stamping same object multiple times to skip VP/VC buffer binds. Reformat drawEntity loop for assets
-    for(let i = 0; i<entities.length ; i++)
+    for(let i = 0; i<trains.length; i++)
     {
-      if(entities[i].texture==0)
-        drawEntity(gl, projectionMatrix, viewMatrix, entities[i], batchskip);
+      trains[i].draw(gl, projectionMatrix, viewMatrix, 3);
+    }
+    for(let i = 0; i<components.length ; i++)
+    {
+      if(components[i].texture==0)
+        ;//components[i].draw(gl, projectionMatrix, viewMatrix);
+        //drawEntity(gl, projectionMatrix, viewMatrix, entities[i], batchskip);
       else
-        drawTexturedEntity(gl, projectionMatrix, viewMatrix, entities[i], batchskip);
+        drawTexturedEntity(gl, projectionMatrix, viewMatrix, components[i], batchskip);
         
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-    for(let i = 0; i<entities.length ; i++)
+    for(let i = 0; i<trains.length; i++)
     {
-      drawEntityToFramebuffer(gl, projectionMatrix, viewMatrix, entities[i], batchskip);
+      trains[i].draw(gl, projectionMatrix, viewMatrix, 2);
+    }
+    for(let i = 0; i<components.length ; i++)
+    {
+      drawEntityToFramebuffer(gl, projectionMatrix, viewMatrix, components[i], batchskip);
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     

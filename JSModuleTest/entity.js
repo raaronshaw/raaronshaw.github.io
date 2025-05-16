@@ -1,9 +1,11 @@
 import {mat4, vec3, mat3} from './glMatrix/index.js';
+import {shader} from './shader.js';
+import {ASSETS} from './init-buffers.js';
 
-export let entities = [];
+export let components = [];
 
 let counter = 1;
-export class entity  {
+export class component  {
     constructor(assetIndex, shaderIndex, position, texture, Kd) {
         this.uid = counter++;
         
@@ -44,5 +46,29 @@ export class entity  {
         this.setTransformationMatrix(this.translationMatrix, R);
     }
     
+    draw(gl, projectionMatrix, viewMatrix, shaderIndex)
+    {
+        let index = shaderIndex;//entity.shaderIndex;
+        {
+            gl.useProgram(shader[index].program);
 
+            gl.uniformMatrix4fv(shader[index].uMatrixProjection, false, projectionMatrix);
+            gl.uniformMatrix4fv(shader[index].uMatrixView, false, viewMatrix);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[this.assetIndex].VP_Buffer);
+            gl.vertexAttribPointer(shader[index].aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(shader[index].aVertexPosition);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, ASSETS[this.assetIndex].VC_Buffer);
+            gl.vertexAttribPointer(shader[index].aVertexNormals, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(shader[index].aVertexNormals);
+            if(shaderIndex == 2)
+                gl.uniform3fv(shader[index].uKd, [this.uid/255,0.0,0.0]); 
+            else 
+                gl.uniform3fv(shader[index].uKd, this.Kd); 
+
+            gl.uniformMatrix4fv(shader[index].uMatrixModel, false, this.transformationMatrix);//translationMatrix);
+            gl.drawArrays(gl.TRIANGLES, 0, ASSETS[this.assetIndex].numItems);
+        }   
+    }
 }

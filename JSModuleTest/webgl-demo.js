@@ -1,18 +1,19 @@
 import { initBuffers } from './init-buffers.js';
 import { drawScene } from './draw-scene.js';
 import { initShaderProgram } from './shader.js';
-import { entity, entities } from './entity.js';
+import { component, components } from './entity.js';
 import { ASSETS } from './init-buffers.js';
 import { mat4} from './glMatrix/index.js';
 import { startCanvasEvents, fb} from './events.js';
 import { naiveGUISetup } from './GUIPanels.js';
 import {shader } from './shader.js';
 import { vec3} from './glMatrix/index.js';
+import {train} from './train.js';
 let cubeRotation = 0.0;
 let deltaTime = 0;
 export let defaultColor = vec3.fromValues(0.4, 0.4, 0.4);
 export let viewMatrix = mat4.create();
-
+export let trains = [];
 
 
 main();
@@ -44,7 +45,7 @@ function main() {
   naiveEntitySetup(gl);
   naiveGUISetup(gl);
   
-  let fbb = startCanvasEvents(entities, gl);
+  let fbb = startCanvasEvents(components, gl);
 
   // Draw the scene repeatedly
   let then = 0;
@@ -53,10 +54,10 @@ function main() {
     deltaTime = now - then;
     then = now;
 
-    drawScene(gl, entities, viewMatrix);
+    drawScene(gl, components, viewMatrix);
     colorPicker(gl, shader[2], fbb);
 
-    RotateFirstCube(entities, deltaTime);
+    RotateFirstCube(components, deltaTime);
     requestAnimationFrame(render);
   }
 
@@ -69,14 +70,14 @@ function colorPicker(gl, shaderProgramme, fbb)
 }
 
 
-function RotateFirstCube(entities, deltaTime)
+function RotateFirstCube(components, deltaTime)
 {
   let speed = 1.0;
-  let R = entities[0].rotationMatrix;
+  let R = components[0].rotationMatrix;
   mat4.rotate(R, R, deltaTime*speed, [0, 0, 1]); 
   mat4.rotate(R, R, deltaTime*speed * 0.7, [0, 1, 0]); 
   mat4.rotate(R, R, deltaTime*speed * 0.3, [1, 0, 0]); 
-  entities[0].setRotationMatrix(R);
+  components[0].setRotationMatrix(R);
 
   
   //setRotationMatrix();
@@ -88,20 +89,22 @@ function naiveEntitySetup(gl)
 {
     
     //ASSET, shader, pos, color, texture
+    trains.push(new train(-13,0,-40));
+    trains.push(new train(-13,10,-40));
     let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
-    entities.push(new entity(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
+    components.push(new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
    
-    entities.push(new entity(0, 0, [-10.0,  -5.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [-10.0,  -5.0, -50.0], 0, defaultColor));
     //entities.push(new entity(0, 0, [-10.0,   0.0, -50.0], texture));
      texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
-    entities.push(new entity(0, 0, [-10.0,   5.0, -50.0], 0, defaultColor));
-    entities.push(new entity(0, 0, [-10.0,  10.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [-10.0,   5.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [-10.0,  10.0, -50.0], 0, defaultColor));
 
-    entities.push(new entity(0, 0, [ -5.0, -10.0, -50.0], 0, defaultColor));
-    entities.push(new entity(0, 0, [ -5.0,  -5.0, -50.0], 0, defaultColor));
-    entities.push(new entity(0, 0, [ -5.0,   0.0, -50.0], 0, defaultColor));
-    entities.push(new entity(0, 0, [ -5.0,   5.0, -50.0], 0, defaultColor));
-    entities.push(new entity(0, 0, [ -5.0,  10.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [ -5.0, -10.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [ -5.0,  -5.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [ -5.0,   0.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [ -5.0,   5.0, -50.0], 0, defaultColor));
+    components.push(new component(0, 0, [ -5.0,  10.0, -50.0], 0, defaultColor));
 /*
     entities.push(new entity(0, 0, [  0.0, -10.0, -50.0], texture));
     entities.push(new entity(0, 0, [  0.0,  -5.0, -50.0], texture));
@@ -216,62 +219,5 @@ function initTexture(gl) {
   return texture;
 }
 
-function updateTexture(gl, texture, video) {
-  const level = 0;
-  const internalFormat = gl.RGBA;
-  const srcFormat = gl.RGBA;
-  const srcType = gl.UNSIGNED_BYTE;
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(
-    gl.TEXTURE_2D,
-    level,
-    internalFormat,
-    srcFormat,
-    srcType,
-    video
-  );
-}
 
-function setupVideo(url) {
-  const video = document.createElement("video");
 
-  let playing = false;
-  let timeupdate = false;
-
-  video.playsInline = true;
-  video.muted = true;
-  video.loop = true;
-
-  // Waiting for these 2 events ensures
-  // there is data in the video
-
-  video.addEventListener(
-    "playing",
-    () => {
-      playing = true;
-      checkReady();
-    },
-    true
-  );
-
-  video.addEventListener(
-    "timeupdate",
-    () => {
-      timeupdate = true;
-      checkReady();
-    },
-    true
-  );
-
-  video.src = url;
-  video.play();
-
-  function checkReady() {
-    if (playing && timeupdate) {
-      //copyVideo = true;
-      copyVideo = false;
-    }
-  }
-
-  return video;
-}
