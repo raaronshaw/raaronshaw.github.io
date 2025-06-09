@@ -387,7 +387,15 @@ function clicktest(gl, event)
    // console.log(temp2);
     let ray_wor = vec3.fromValues(temp2[0], temp2[1], temp2[2]); // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
     ray_wor = vec3.normalize(ray_wor, ray_wor);
-    console.log(ray_wor);
+    //console.log(ray_wor);
+    //t = -camera_position dot normal of ground plane + length of ray / (ray_wor dot normal of ground plane); if zero miss perpendicular
+    let t = -1.0 * vec3.dot(camera_position, vec3.fromValues(0,-1.0,0.0)) + 0.0;
+    t = t / vec3.dot(ray_wor, vec3.fromValues(0,-1.0,0.0));// dot normal of ground plane); if zero miss perpendicular
+    let xyz_select = vec3.create();
+    vec3.add(xyz_select, camera_position, ray_wor);
+    vec3.scale(xyz_select, xyz_select, t);////get xyz from camera_position + ray_wor * t;
+    if(t<0) console.log('miss');
+    else console.log(xyz_select);
   }
 
 
