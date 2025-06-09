@@ -94,17 +94,17 @@ function naiveEntitySetup(gl)
     let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
     components.push(new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
    
-    components.push(new component(0, 0, [-10.0,  -5.0, -50.0], 0, defaultColor));
+    //components.push(new component(0, 0, [-10.0,  -5.0, -50.0], 0, defaultColor));
     //entities.push(new entity(0, 0, [-10.0,   0.0, -50.0], texture));
-     texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
-    components.push(new component(0, 0, [-10.0,   5.0, -50.0], 0, defaultColor));
-    components.push(new component(0, 0, [-10.0,  10.0, -50.0], 0, defaultColor));
+    // texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
+   // components.push(new component(0, 0, [-10.0,   5.0, -50.0], 0, defaultColor));
+   //components.push(new component(0, 0, [-10.0,  10.0, -50.0], 0, defaultColor));
 
-    components.push(new component(0, 0, [ -5.0, -10.0, -50.0], 0, defaultColor));
-    components.push(new component(0, 0, [ -5.0,  -5.0, -50.0], 0, defaultColor));
-    components.push(new component(0, 0, [ -5.0,   0.0, -50.0], 0, defaultColor));
-    components.push(new component(0, 0, [ -5.0,   5.0, -50.0], 0, defaultColor));
-    components.push(new component(0, 0, [ -5.0,  10.0, -50.0], 0, defaultColor));
+   // components.push(new component(0, 0, [ -5.0, -10.0, -50.0], 0, defaultColor));
+   // components.push(new component(0, 0, [ -5.0,  -5.0, -50.0], 0, defaultColor));
+   // components.push(new component(0, 0, [ -5.0,   0.0, -50.0], 0, defaultColor));
+   // components.push(new component(0, 0, [ -5.0,   5.0, -50.0], 0, defaultColor));
+   // components.push(new component(0, 0, [ -5.0,  10.0, -50.0], 0, defaultColor));
 /*
     entities.push(new entity(0, 0, [  0.0, -10.0, -50.0], texture));
     entities.push(new entity(0, 0, [  0.0,  -5.0, -50.0], texture));

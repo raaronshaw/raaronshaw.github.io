@@ -2,7 +2,7 @@ import {viewMatrix} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
 import {components, component} from './entity.js';
 import {trains, loadTexture, defaultColor} from './webgl-demo.js';
-
+import {projectionMatrix} from'./draw-scene.js';
 
 let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
@@ -10,7 +10,12 @@ let camera_orientation = quat.create();
 let speed_turn = 0.5;
 let speed_move = 0.5;
 let mouseRightDown = false;
+let mouseLeftDown = false;
+let mouseMiddleDown = false;
 let mousePos = {x:0,y:0};
+let mouseLeftPos = {x:0,y:0};
+let mouseRightPos = {x:0,y:0};
+let mouseMiddlePos = {x:0,y:0};
 export let debug_colours = 0;
 
 function modifyText() {
@@ -95,8 +100,19 @@ export let fb_texture = 0;
     mousePos = {x:event.clientX, y:event.clientY};
   }
   else mouseRightDown = false;
+  if(event.button==0)//Left Mouse Button
+  {
+    mouseLeftDown = true;
+    mouseLeftPos = {x:event.clientX, y:event.clientY};
 
-  
+  }
+  else mouseLeftDown = false;
+  if(event.button==1)
+  {
+    mouseMiddleDown = true;
+    mouseMiddlePos = {x:event.clientX, y:event.clientY};
+  }
+  else mouseMiddleDown = false;
 
  }
 
@@ -107,18 +123,62 @@ function mouseUp(event)
     mouseRightDown = false;
     mousePos = {x:event.clientX, y:event.clientY};
   }
+  if(event.button==0)//Left Mouse Button
+  {
+    mouseLeftDown = false;
+    mouseLeftPos = {x:event.clientX, y:event.clientY};
+    
+  }
+  if(event.button==1)
+  {
+    mouseMiddleDown = false;
+    mouseMiddlePos = {x:event.clientX, y:event.clientY};
+  }
   //else mouseRightDown = false;
  }
 
 
 function mouseMove(event)
 {
-  let deltaHeading = event.clientX - mousePos.x;
-  let deltaPitch = event.clientY - mousePos.y
-  mousePos = {x:event.clientX, y:event.clientY};
+  //let deltaHeading = event.clientX - mousePos.x;
+  //let deltaPitch = event.clientY - mousePos.y
+  //mousePos = {x:event.clientX, y:event.clientY};
+if(mouseLeftDown)
+  {
+    let deltaX = event.clientX - mousePos.x;
+    let deltaY = event.clientY - mousePos.y
+    mousePos = {x:event.clientX, y:event.clientY};
+    /*if (deltaHeading != 0.0) {
+      deltaHeading*=speed_turn;
+      let deltaquat = quat.create();
+      let T = mat4.create();
+      let R = mat4.create();
+      quat.setAxisAngle(deltaquat, [0.0,1.0,0.0], degToRad(deltaHeading));
+      quat.multiply(camera_orientation, camera_orientation, deltaquat);
+      mat4.fromQuat(R, camera_orientation);
+      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+      mat4.multiply(viewMatrix, R, T);
+    }
+    if (deltaPitch != 0.0) { 
+      deltaPitch*=speed_turn;
+      let deltaquat = quat.create();
+      let T = mat4.create();
+      let R = mat4.create();
+      let rightvector = vec3.create();
+      vec3.normalize(rightvector, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
+      quat.setAxisAngle(deltaquat, rightvector, degToRad(deltaPitch));
+      quat.multiply(camera_orientation, camera_orientation, deltaquat);
+      mat4.fromQuat(R, camera_orientation);
+      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+      mat4.multiply(viewMatrix, R, T);
+    }*/
+  }
 
   if(mouseRightDown)
   {
+    let deltaHeading = event.clientX - mousePos.x;
+    let deltaPitch = event.clientY - mousePos.y
+    mousePos = {x:event.clientX, y:event.clientY};
     if (deltaHeading != 0.0) {
       deltaHeading*=speed_turn;
       let deltaquat = quat.create();
@@ -276,8 +336,8 @@ function clicktest(gl, event)
   document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
   for(let i = 0; i<components.length ; i++)
     components[i].Kd = defaultColor;
-  if(index>0)
-    components[index-1].Kd = [0.0,1.0,0.0];
+  //if(index>0)
+   // components[index-1].Kd = [0.0,1.0,0.0];
   for(let i = 0; i<trains.length ; i++)
     trains[i].setColor(defaultColor);
   if(index>0)
@@ -292,6 +352,46 @@ function clicktest(gl, event)
 
     }
   }
+
+  //RAYCAST
+  {
+    let x = (2.0 * event.clientX) / gl.canvas.clientWidth - 1.0; 
+    let y = 1.0 - (2.0 * event.clientY) / gl.canvas.clientHeight; 
+    let z = 1.0; 
+    let ray_nds = vec3.fromValues(x, y, z);
+    //console.log(y);
+    let ray_clip = vec4.fromValues(ray_nds[0], ray_nds[1], -1.0, 1.0);
+    //console.log(ray_clip);
+    let ray_eye = mat4.create();
+    mat4.invert(ray_eye, projectionMatrix);// * ray_clip;
+    let temp3 = vec4.create();
+    temp3[0] = ray_eye[0] * ray_clip[0] + ray_eye[4] * ray_clip[1] + ray_eye[8]  * ray_clip[2] + ray_eye[12] * ray_clip[3];
+    temp3[1] = ray_eye[1] * ray_clip[0] + ray_eye[5] * ray_clip[1] + ray_eye[9]  * ray_clip[2] + ray_eye[13] * ray_clip[3];
+    temp3[2] = ray_eye[2] * ray_clip[0] + ray_eye[6] * ray_clip[1] + ray_eye[10] * ray_clip[2] + ray_eye[14] * ray_clip[3];
+    temp3[3] = ray_eye[3] * ray_clip[0] + ray_eye[7] * ray_clip[1] + ray_eye[11] * ray_clip[2] + ray_eye[15] * ray_clip[3]; 
+    ray_eye = vec4.fromValues(temp3[0], temp3[1], -1.0, 0.0);
+    //console.log(ray_eye);
+    let temp = mat4.create();
+    mat4.invert(temp, viewMatrix);
+    //console.log(temp);
+    //console.log(viewMatrix);
+    let temp2 = vec4.create();
+    //temp = temp * ray_eye;
+    
+    temp2[0] = temp[0] * ray_eye[0] + temp[4] * ray_eye[1] + temp[8]  * ray_eye[2] + temp[12] * ray_eye[3];
+    temp2[1] = temp[1] * ray_eye[0] + temp[5] * ray_eye[1] + temp[9]  * ray_eye[2] + temp[13] * ray_eye[3];
+    temp2[2] = temp[2] * ray_eye[0] + temp[6] * ray_eye[1] + temp[10] * ray_eye[2] + temp[14] * ray_eye[3];
+    temp2[3] = temp[3] * ray_eye[0] + temp[7] * ray_eye[1] + temp[11] * ray_eye[2] + temp[15] * ray_eye[3];
+
+    
+   // console.log(temp2);
+    let ray_wor = vec3.fromValues(temp2[0], temp2[1], temp2[2]); // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
+    ray_wor = vec3.normalize(ray_wor, ray_wor);
+    console.log(ray_wor);
+  }
+
+
+
     
       
 }

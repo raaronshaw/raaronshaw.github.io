@@ -4,6 +4,7 @@ import {fb, debug_colours} from './events.js';
 //import {entity} from './entity.js'
 import {shader} from './shader.js';
 import {trains} from './webgl-demo.js';
+export const projectionMatrix = mat4.create();
 
 function drawScene(gl, components, viewMatrix) {
   //gl.bindBuffer()
@@ -23,7 +24,7 @@ function drawScene(gl, components, viewMatrix) {
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
-    const projectionMatrix = mat4.create();
+    //const projectionMatrix = mat4.create();
     
     mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
   
