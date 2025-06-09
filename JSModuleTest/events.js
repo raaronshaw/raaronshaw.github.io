@@ -355,8 +355,8 @@ function clicktest(gl, event)
 
   //RAYCAST
   {
-    let x = (2.0 * event.clientX) / gl.canvas.clientWidth - 1.0; 
-    let y = 1.0 - (2.0 * event.clientY) / gl.canvas.clientHeight; 
+    let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
+    let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
     let z = 1.0; 
     let ray_nds = vec3.fromValues(x, y, z);
     //console.log(y);
@@ -389,13 +389,18 @@ function clicktest(gl, event)
     ray_wor = vec3.normalize(ray_wor, ray_wor);
     //console.log(ray_wor);
     //t = -camera_position dot normal of ground plane + length of ray / (ray_wor dot normal of ground plane); if zero miss perpendicular
-    let t = -1.0 * vec3.dot(camera_position, vec3.fromValues(0,-1.0,0.0)) + 0.0;
-    t = t / vec3.dot(ray_wor, vec3.fromValues(0,-1.0,0.0));// dot normal of ground plane); if zero miss perpendicular
+    let t = -1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0;
+    t = t / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));// dot normal of ground plane); if zero miss perpendicular
     let xyz_select = vec3.create();
+    //vec3.add(xyz_select, camera_position, ray_wor);
+    //vec3.scale(xyz_select, xyz_select, t);////get xyz from camera_position + ray_wor * t;
+    vec3.scale(ray_wor, ray_wor, t);////get xyz from camera_position + ray_wor * t;
     vec3.add(xyz_select, camera_position, ray_wor);
-    vec3.scale(xyz_select, xyz_select, t);////get xyz from camera_position + ray_wor * t;
-    if(t<0) console.log('miss');
-    else console.log(xyz_select);
+   // if(t<0) console.log('miss');
+    //else console.log(xyz_select);
+       //texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
+    components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], loadTexture(gl, [1.0,  0.5,  1.0], 0), defaultColor));
+    //components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], texture, defaultColor));
   }
 
 
