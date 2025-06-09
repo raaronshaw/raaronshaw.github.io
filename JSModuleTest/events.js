@@ -358,49 +358,33 @@ function clicktest(gl, event)
     let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
     let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
     let z = 1.0; 
-    let ray_nds = vec3.fromValues(x, y, z);
-    //console.log(y);
-    let ray_clip = vec4.fromValues(ray_nds[0], ray_nds[1], -1.0, 1.0);
-    //console.log(ray_clip);
-    let ray_eye = mat4.create();
-    mat4.invert(ray_eye, projectionMatrix);// * ray_clip;
-    let temp3 = vec4.create();
-    temp3[0] = ray_eye[0] * ray_clip[0] + ray_eye[4] * ray_clip[1] + ray_eye[8]  * ray_clip[2] + ray_eye[12] * ray_clip[3];
-    temp3[1] = ray_eye[1] * ray_clip[0] + ray_eye[5] * ray_clip[1] + ray_eye[9]  * ray_clip[2] + ray_eye[13] * ray_clip[3];
-    temp3[2] = ray_eye[2] * ray_clip[0] + ray_eye[6] * ray_clip[1] + ray_eye[10] * ray_clip[2] + ray_eye[14] * ray_clip[3];
-    temp3[3] = ray_eye[3] * ray_clip[0] + ray_eye[7] * ray_clip[1] + ray_eye[11] * ray_clip[2] + ray_eye[15] * ray_clip[3]; 
-    ray_eye = vec4.fromValues(temp3[0], temp3[1], -1.0, 0.0);
-    //console.log(ray_eye);
-    let temp = mat4.create();
-    mat4.invert(temp, viewMatrix);
-    //console.log(temp);
-    //console.log(viewMatrix);
-    let temp2 = vec4.create();
-    //temp = temp * ray_eye;
-    
-    temp2[0] = temp[0] * ray_eye[0] + temp[4] * ray_eye[1] + temp[8]  * ray_eye[2] + temp[12] * ray_eye[3];
-    temp2[1] = temp[1] * ray_eye[0] + temp[5] * ray_eye[1] + temp[9]  * ray_eye[2] + temp[13] * ray_eye[3];
-    temp2[2] = temp[2] * ray_eye[0] + temp[6] * ray_eye[1] + temp[10] * ray_eye[2] + temp[14] * ray_eye[3];
-    temp2[3] = temp[3] * ray_eye[0] + temp[7] * ray_eye[1] + temp[11] * ray_eye[2] + temp[15] * ray_eye[3];
 
+    let invertedProjectionMatrix = mat4.create();
+    mat4.invert(invertedProjectionMatrix, projectionMatrix);
+
+    let ray_eye = vec4.fromValues(
+      invertedProjectionMatrix[0] * x + invertedProjectionMatrix[4] * y + invertedProjectionMatrix[8]  * -1.0 + invertedProjectionMatrix[12], 
+      invertedProjectionMatrix[1] * x + invertedProjectionMatrix[5] * y + invertedProjectionMatrix[9]  * -1.0 + invertedProjectionMatrix[13], 
+      -1.0, 0.0);
+
+    let invertedViewMatrix = mat4.create();
+    mat4.invert(invertedViewMatrix, viewMatrix);
+
+    let ray_wor = vec3.fromValues(
+      invertedViewMatrix[0] * ray_eye[0] + invertedViewMatrix[4] * ray_eye[1] + invertedViewMatrix[8]  * -1.0, 
+      invertedViewMatrix[1] * ray_eye[0] + invertedViewMatrix[5] * ray_eye[1] + invertedViewMatrix[9]  * -1.0, 
+      invertedViewMatrix[2] * ray_eye[0] + invertedViewMatrix[6] * ray_eye[1] + invertedViewMatrix[10] * -1.0
+    ); 
     
-   // console.log(temp2);
-    let ray_wor = vec3.fromValues(temp2[0], temp2[1], temp2[2]); // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
-    ray_wor = vec3.normalize(ray_wor, ray_wor);
-    //console.log(ray_wor);
-    //t = -camera_position dot normal of ground plane + length of ray / (ray_wor dot normal of ground plane); if zero miss perpendicular
-    let t = -1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0;
-    t = t / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));// dot normal of ground plane); if zero miss perpendicular
+    vec3.normalize(ray_wor, ray_wor);
+
+    let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
+    vec3.scale(ray_wor, ray_wor, t);
+
     let xyz_select = vec3.create();
-    //vec3.add(xyz_select, camera_position, ray_wor);
-    //vec3.scale(xyz_select, xyz_select, t);////get xyz from camera_position + ray_wor * t;
-    vec3.scale(ray_wor, ray_wor, t);////get xyz from camera_position + ray_wor * t;
     vec3.add(xyz_select, camera_position, ray_wor);
-   // if(t<0) console.log('miss');
-    //else console.log(xyz_select);
-       //texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
+
     components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], loadTexture(gl, [1.0,  0.5,  1.0], 0), defaultColor));
-    //components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], texture, defaultColor));
   }
 
 
