@@ -9,8 +9,8 @@ export class train
         this.start = vec3.fromValues(x,y,z);
         this.end = vec3.fromValues(x+10, y, z);
         this.children = [
-            new component(model.Cube, 0, [ x,      y, z], 0, defaultColor),
-            new component(model.Cube, 0, [ x+5,    y, z], 0, defaultColor), 
+            //new component(model.TAI10_48, 0, [ x,      y, z], 0, defaultColor),
+            new component(model.INT05_48, 0, [ x+1,    y, z], 0, defaultColor), 
             new component(model.Cube, 0, [ x+10,   y, z], 0, defaultColor)
         
         ];
