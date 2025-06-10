@@ -11,7 +11,7 @@ export class train
         this.children = [
             //new component(model.TAI10_48, 0, [ x,      y, z], 0, defaultColor),
             new component(model.INT05_48, 0, [ x+1,    y, z], 0, defaultColor), 
-            new component(model.Cube, 0, [ x+10,   y, z], 0, defaultColor)
+            new component(model.DRI02_48, 0, [ x+30,   y, z], 0, defaultColor)
         
         ];
     }

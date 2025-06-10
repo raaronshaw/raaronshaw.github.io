@@ -6,9 +6,13 @@ import {
   VP_TAI10_48_Bearing, VC_TAI10_48_Bearing
 
 } from './Asset_Models/TAI10_48.js'
+
 import {
   VP_INT05_48, VC_INT05_48
 } from './Asset_Models/INT05_48.js'
+import {
+VP_DRI02_48_Part001, VC_DRI02_48_Part001
+} from './Asset_Models/DRI02_48.js'
 function initBuffers(gl) {
 
     setupAssets(gl);
@@ -21,7 +25,8 @@ export const model = {
   Cube: 0,
   Square: 1,
   TAI10_48: 2,
-  INT05_48: 3
+  INT05_48: 3,
+  DRI02_48: 4
 };
 
 function setupAssets(gl){
@@ -12974,6 +12979,28 @@ let VP, VC, TC, num = 0;
 {//INT05-48
   let VP = VP_INT05_48;
   let VC = VC_INT05_48;
+  let TC = [0];
+
+  let VP_Buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, VP_Buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VP), gl.STATIC_DRAW);
+
+  let VC_Buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, VC_Buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VC), gl.STATIC_DRAW);
+
+  let TC_Buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, TC_Buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(TC), gl.STATIC_DRAW);
+      
+  let numItems = VP.length/3;
+
+  ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+}
+
+{//DRI02_48
+  let VP = VP_DRI02_48_Part001;
+  let VC = VC_DRI02_48_Part001;
   let TC = [0];
 
   let VP_Buffer = gl.createBuffer();
