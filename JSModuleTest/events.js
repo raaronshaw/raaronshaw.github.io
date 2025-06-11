@@ -16,6 +16,12 @@ let mousePos = {x:0,y:0};
 let mouseLeftPos = {x:0,y:0};
 let mouseRightPos = {x:0,y:0};
 let mouseMiddlePos = {x:0,y:0};
+let xyz_select = vec3.create();
+let xyz_select_previous = vec3.create();
+let xyz_select_his = vec3.create();
+let his_x = 0;
+let his_x_prev = 0;
+
 export let debug_colours = 0;
 
 function modifyText() {
@@ -34,17 +40,23 @@ function modifyText() {
  {
     let fbb = initializeColorBasedMousePicking(gl);
     document.getElementById("Layout").addEventListener("click", (event)=> { 
-      
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-      
       clicktest(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       });
     document.addEventListener("keypress", handleKeyPress, false);
     document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
-    document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
+    //document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
+    document.getElementById("Layout").addEventListener("mousedown", (event)=> { 
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      mouseDown(gl, event);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    });
     document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
-    document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
+    //document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
+    document.getElementById("Layout").addEventListener("mousemove", (event)=> { 
+      mouseMove(gl, event);
+    });
     return fbb;
  }
 
@@ -92,7 +104,7 @@ export let fb_texture = 0;
   return fb;
  }
 
- function mouseDown(event)
+ function mouseDown(gl, event)
  {
   if(event.button==2)
   {
@@ -104,7 +116,83 @@ export let fb_texture = 0;
   {
     mouseLeftDown = true;
     mouseLeftPos = {x:event.clientX, y:event.clientY};
+    //RAYCAST
+    {
+      let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
+      let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
+      let z = 1.0; 
 
+      let invertedProjectionMatrix = mat4.create();
+      mat4.invert(invertedProjectionMatrix, projectionMatrix);
+
+      let ray_eye = vec4.fromValues(
+        invertedProjectionMatrix[0] * x + invertedProjectionMatrix[4] * y + invertedProjectionMatrix[8]  * -1.0 + invertedProjectionMatrix[12], 
+        invertedProjectionMatrix[1] * x + invertedProjectionMatrix[5] * y + invertedProjectionMatrix[9]  * -1.0 + invertedProjectionMatrix[13], 
+        -1.0, 0.0);
+
+      let invertedViewMatrix = mat4.create();
+      mat4.invert(invertedViewMatrix, viewMatrix);
+
+      let ray_wor = vec3.fromValues(
+        invertedViewMatrix[0] * ray_eye[0] + invertedViewMatrix[4] * ray_eye[1] + invertedViewMatrix[8]  * -1.0, 
+        invertedViewMatrix[1] * ray_eye[0] + invertedViewMatrix[5] * ray_eye[1] + invertedViewMatrix[9]  * -1.0, 
+        invertedViewMatrix[2] * ray_eye[0] + invertedViewMatrix[6] * ray_eye[1] + invertedViewMatrix[10] * -1.0
+      ); 
+      
+      vec3.normalize(ray_wor, ray_wor);
+
+      let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
+      vec3.scale(ray_wor, ray_wor, t);
+
+      //let xyz_select = vec3.create();
+      vec3.add(xyz_select, camera_position, ray_wor);
+      xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
+
+  //   components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], loadTexture(gl, [1.0,  0.5,  1.0], 0), defaultColor));
+    }
+
+    {
+      let pixels = new Uint8Array(1 * 1 * 4,);
+      gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+      let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
+      document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
+      for(let i = 0; i<components.length ; i++)
+        components[i].Kd = defaultColor;
+      //if(index>0)
+      // components[index-1].Kd = [0.0,1.0,0.0];
+      //for(let i = 0; i<trains.length ; i++)
+      //{ 
+      //  trains[i].setColor(defaultColor);
+        //trains[i].selected = false;
+      //}
+      let selected_prev_parent = 0;
+      let selected_current_parent = 0;
+      if(true)
+      {
+        for(let i = 0; i<trains.length; i++)
+        {
+          for(let j =0; j<trains[i].children.length;j++)
+          {
+            //if(trains[i].children[j].selected==true)
+              //selected_prev = trains[i].children[j].uid;
+            if((index)==trains[i].children[j].uid)
+            {
+              selected_current = index;
+              trains[i].children[j].selected = true;
+              trains[i].children[j].Kd = [0.0,1.0,0.0];
+            }
+            else
+            {
+              trains[i].children[j].selected = false;
+              trains[i].children[j].Kd = defaultColor;//[0.0,1.0,0.0];
+            }
+          }
+        }
+        
+
+
+      }
+    }
   }
   else mouseLeftDown = false;
   if(event.button==1)
@@ -127,7 +215,6 @@ function mouseUp(event)
   {
     mouseLeftDown = false;
     mouseLeftPos = {x:event.clientX, y:event.clientY};
-    
   }
   if(event.button==1)
   {
@@ -138,41 +225,62 @@ function mouseUp(event)
  }
 
 
-function mouseMove(event)
+function mouseMove(gl, event)
 {
-  //let deltaHeading = event.clientX - mousePos.x;
-  //let deltaPitch = event.clientY - mousePos.y
-  //mousePos = {x:event.clientX, y:event.clientY};
-if(mouseLeftDown)
+  if(mouseLeftDown)
   {
     let deltaX = event.clientX - mousePos.x;
     let deltaY = event.clientY - mousePos.y
     mousePos = {x:event.clientX, y:event.clientY};
-    /*if (deltaHeading != 0.0) {
-      deltaHeading*=speed_turn;
-      let deltaquat = quat.create();
-      let T = mat4.create();
-      let R = mat4.create();
-      quat.setAxisAngle(deltaquat, [0.0,1.0,0.0], degToRad(deltaHeading));
-      quat.multiply(camera_orientation, camera_orientation, deltaquat);
-      mat4.fromQuat(R, camera_orientation);
-      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
-      mat4.multiply(viewMatrix, R, T);
+    //RAYCAST
+    {
+      let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
+      let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
+      let z = 1.0; 
+      his_x = x;
+      let invertedProjectionMatrix = mat4.create();
+      mat4.invert(invertedProjectionMatrix, projectionMatrix);
+
+      let ray_eye = vec4.fromValues(
+        invertedProjectionMatrix[0] * x + invertedProjectionMatrix[4] * y + invertedProjectionMatrix[8]  * -1.0 + invertedProjectionMatrix[12], 
+        invertedProjectionMatrix[1] * x + invertedProjectionMatrix[5] * y + invertedProjectionMatrix[9]  * -1.0 + invertedProjectionMatrix[13], 
+        -1.0, 0.0);
+
+      let invertedViewMatrix = mat4.create();
+      mat4.invert(invertedViewMatrix, viewMatrix);
+
+      let ray_wor = vec3.fromValues(
+        invertedViewMatrix[0] * ray_eye[0] + invertedViewMatrix[4] * ray_eye[1] + invertedViewMatrix[8]  * -1.0, 
+        invertedViewMatrix[1] * ray_eye[0] + invertedViewMatrix[5] * ray_eye[1] + invertedViewMatrix[9]  * -1.0, 
+        invertedViewMatrix[2] * ray_eye[0] + invertedViewMatrix[6] * ray_eye[1] + invertedViewMatrix[10] * -1.0
+      ); 
+      
+      vec3.normalize(ray_wor, ray_wor);
+
+      let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
+      vec3.scale(ray_wor, ray_wor, t);
+
+      for(let i = 0; i<trains.length; i++)
+      {
+        for(let j = 0; j<trains[i].children.length; j++)
+        {
+          if(trains[i].children[j].selected == true)
+          {
+            trains[i].children[j].move([
+              xyz_select[0]-xyz_select_previous[0],
+              xyz_select[1]-xyz_select_previous[1],
+              xyz_select[2]-xyz_select_previous[2]
+            ]);
+          }
+        }
+      }
+      xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
+      vec3.add(xyz_select, camera_position, ray_wor);
+      
     }
-    if (deltaPitch != 0.0) { 
-      deltaPitch*=speed_turn;
-      let deltaquat = quat.create();
-      let T = mat4.create();
-      let R = mat4.create();
-      let rightvector = vec3.create();
-      vec3.normalize(rightvector, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
-      quat.setAxisAngle(deltaquat, rightvector, degToRad(deltaPitch));
-      quat.multiply(camera_orientation, camera_orientation, deltaquat);
-      mat4.fromQuat(R, camera_orientation);
-      mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
-      mat4.multiply(viewMatrix, R, T);
-    }*/
   }
+
+
 
   if(mouseRightDown)
   {
@@ -330,6 +438,8 @@ function handleMouseDown(event) {
     
 function clicktest(gl, event)
 {
+  return;
+
   let pixels = new Uint8Array(1 * 1 * 4,);
   gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
@@ -338,54 +448,32 @@ function clicktest(gl, event)
     components[i].Kd = defaultColor;
   //if(index>0)
    // components[index-1].Kd = [0.0,1.0,0.0];
-  for(let i = 0; i<trains.length ; i++)
-    trains[i].setColor(defaultColor);
-  if(index>0)
+  //for(let i = 0; i<trains.length ; i++)
+  //{ 
+  //  trains[i].setColor(defaultColor);
+    //trains[i].selected = false;
+  //}
+  if(true)
   {
     for(let i = 0; i<trains.length; i++)
     {
       for(let j =0; j<trains[i].children.length;j++)
       {
         if((index)==trains[i].children[j].uid)
-          trains[i].setColor([0.0,1.0,0.0]);
+        {
+          trains[i].children[j].selected = true;
+          trains[i].children[j].Kd = [0.0,1.0,0.0];
+        }
+        else
+        {
+          trains[i].children[j].selected = false;
+          trains[i].children[j].Kd = defaultColor;//[0.0,1.0,0.0];
+        }
       }
-
     }
   }
 
-  //RAYCAST
-  {
-    let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
-    let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
-    let z = 1.0; 
-
-    let invertedProjectionMatrix = mat4.create();
-    mat4.invert(invertedProjectionMatrix, projectionMatrix);
-
-    let ray_eye = vec4.fromValues(
-      invertedProjectionMatrix[0] * x + invertedProjectionMatrix[4] * y + invertedProjectionMatrix[8]  * -1.0 + invertedProjectionMatrix[12], 
-      invertedProjectionMatrix[1] * x + invertedProjectionMatrix[5] * y + invertedProjectionMatrix[9]  * -1.0 + invertedProjectionMatrix[13], 
-      -1.0, 0.0);
-
-    let invertedViewMatrix = mat4.create();
-    mat4.invert(invertedViewMatrix, viewMatrix);
-
-    let ray_wor = vec3.fromValues(
-      invertedViewMatrix[0] * ray_eye[0] + invertedViewMatrix[4] * ray_eye[1] + invertedViewMatrix[8]  * -1.0, 
-      invertedViewMatrix[1] * ray_eye[0] + invertedViewMatrix[5] * ray_eye[1] + invertedViewMatrix[9]  * -1.0, 
-      invertedViewMatrix[2] * ray_eye[0] + invertedViewMatrix[6] * ray_eye[1] + invertedViewMatrix[10] * -1.0
-    ); 
-    
-    vec3.normalize(ray_wor, ray_wor);
-
-    let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
-    vec3.scale(ray_wor, ray_wor, t);
-
-    let xyz_select = vec3.create();
-    vec3.add(xyz_select, camera_position, ray_wor);
-
-    components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], loadTexture(gl, [1.0,  0.5,  1.0], 0), defaultColor));
-  }
+  
 
 
 

@@ -6,9 +6,9 @@ export let components = [];
 
 let counter = 1;
 export class component  {
-    constructor(assetIndex, shaderIndex, position, texture, Kd) {
+        constructor(assetIndex, shaderIndex, position, texture, Kd) {
         this.uid = counter++;
-        
+        this.selected = 0;
         if(assetIndex == undefined) this.assetIndex = 0;
         else this.assetIndex = assetIndex;
         if(shaderIndex == undefined) this.shaderIndex = 0; 
@@ -28,12 +28,18 @@ export class component  {
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
         //console.log(this.uid);
     }
-
+    getTranslationMatrix() {return this.translationMatrix;}
+    setPosition(position){this.setTranslationMatrix(position);}
+    move(xyz_change){
+        this.setTranslationMatrix(xyz_change);
+    }
     setTranslationMatrix(position){
         mat4.translate(this.translationMatrix, this.translationMatrix, [position[0], position[1], position[2]]); 
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    
     }
-    getLocation(){return vec3(translationMatrix[3], translationMatrix[7], translationMatrix[11]);}
+    getPosition(){return [this.translationMatrix[12], this.translationMatrix[13], this.translationMatrix[14]];}
+    getLocation(){return [this.translationMatrix[12], this.translationMatrix[13], this.translationMatrix[14]];}
 
     setTransformationMatrix(T, R)
     {

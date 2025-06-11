@@ -8,10 +8,11 @@ export class train
     constructor(x, y, z){
         this.start = vec3.fromValues(x,y,z);
         this.end = vec3.fromValues(x+10, y, z);
+        this.selected = false;
         this.children = [
-            //new component(model.TAI10_48, 0, [ x,      y, z], 0, defaultColor),
-            new component(model.INT05_48, 0, [ x+1,    y, z], 0, defaultColor), 
-            new component(model.DRI02_48, 0, [ x+30,   y, z], 0, defaultColor)
+            new component(model.TAI10_48, 0, [ x,      y, z], 0, defaultColor),
+            new component(model.INT05_48, 0, [ x+30-5.5,    y, z], 0, defaultColor), 
+            new component(model.DRI02_48, 0, [ x+80-1,   y, z], 0, defaultColor)
         
         ];
     }
@@ -20,6 +21,14 @@ export class train
         for(let i =0; i<this.children.length; i++)
         {
             this.children[i].draw(gl, projectionMatrix, viewMatrix, shaderIndex);
+        }
+    }
+    setSelected(selected)
+    {
+        this.selected = selected;
+        for(let i =0; i<this.children.length; i++)
+        {
+            this.children[i].selected = this.selected;
         }
     }
     setColor(Kd)
