@@ -52,6 +52,11 @@ function modifyText() {
       mouseDown(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     });
+    document.getElementById("Layout").addEventListener("dblclick", (event)=> {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      dblClick(gl, event);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    });
     document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
     //document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
     document.getElementById("Layout").addEventListener("mousemove", (event)=> { 
@@ -165,32 +170,37 @@ export let fb_texture = 0;
       //  trains[i].setColor(defaultColor);
         //trains[i].selected = false;
       //}
-      let selected_prev_parent = 0;
-      let selected_current_parent = 0;
+      let selected = [];
+      let selected_current = 0;
       if(true)
       {
         for(let i = 0; i<trains.length; i++)
         {
           for(let j =0; j<trains[i].children.length;j++)
           {
-            //if(trains[i].children[j].selected==true)
-              //selected_prev = trains[i].children[j].uid;
-            if((index)==trains[i].children[j].uid)
+            if(trains[i].children[j].selected == true) selected.push(trains[i].children[j].uid);
+          }
+        }
+        if(selected.includes(index)==false)
+        {
+          selected = [];
+          for(let i = 0; i<trains.length; i++)
+          {
+            for(let j =0; j<trains[i].children.length;j++)
             {
-              selected_current = index;
-              trains[i].children[j].selected = true;
-              trains[i].children[j].Kd = [0.0,1.0,0.0];
-            }
-            else
-            {
-              trains[i].children[j].selected = false;
-              trains[i].children[j].Kd = defaultColor;//[0.0,1.0,0.0];
+              if((index)==trains[i].children[j].uid)
+              {
+                trains[i].children[j].selected = true;
+                trains[i].children[j].Kd = [0.0,1.0,0.0];
+              }
+              else
+              {
+                trains[i].children[j].selected = false;
+                trains[i].children[j].Kd = defaultColor;//[0.0,1.0,0.0];
+              }
             }
           }
         }
-        
-
-
       }
     }
   }
@@ -203,6 +213,46 @@ export let fb_texture = 0;
   else mouseMiddleDown = false;
 
  }
+
+function dblClick(gl, event) 
+{
+  let pixels = new Uint8Array(1 * 1 * 4,);
+  gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
+  document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
+  console.log("dblclick");
+  let selected = [];
+  for(let i = 0; i<trains.length; i++)
+  {
+    for(let j =0; j<trains[i].children.length;j++)
+    {
+      if((index)==trains[i].children[j].uid)
+      {
+        for(let k =0; k<trains[i].children.length;k++)
+        {
+          selected.push(trains[i].children[k].uid);  
+        }
+        break;
+      }
+    }
+  }
+  for(let i = 0; i<trains.length; i++)
+  {
+    for(let j =0; j<trains[i].children.length;j++)
+    {
+      if(selected.includes(trains[i].children[j].uid)==true)
+      {
+        trains[i].children[j].selected = true;
+        trains[i].children[j].Kd = [0.0,1.0,0.0];        
+      }
+      else
+      {
+        trains[i].children[j].selected = false;
+        trains[i].children[j].Kd = defaultColor;
+      }
+    }
+  }  
+}
 
 function mouseUp(event)
  {
@@ -259,7 +309,7 @@ function mouseMove(gl, event)
 
       let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
       vec3.scale(ray_wor, ray_wor, t);
-
+      let test_train_select = 0;
       for(let i = 0; i<trains.length; i++)
       {
         for(let j = 0; j<trains[i].children.length; j++)
@@ -271,16 +321,23 @@ function mouseMove(gl, event)
               xyz_select[1]-xyz_select_previous[1],
               xyz_select[2]-xyz_select_previous[2]
             ]);
+            test_train_select = i;
           }
         }
       }
       xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
       vec3.add(xyz_select, camera_position, ray_wor);
-      
+
+      document.getElementById("t4").firstChild.nodeValue = 
+        `train and start and end `+
+        //${test_train_select} 
+        //${trains[test_train_select].getStartPosition()} 
+        //${trains[test_train_select].getEndPosition()} 
+        //${9999999999} 
+        `${trains[test_train_select].getVector()} 
+        pair`;      
     }
   }
-
-
 
   if(mouseRightDown)
   {
@@ -453,7 +510,7 @@ function clicktest(gl, event)
   //  trains[i].setColor(defaultColor);
     //trains[i].selected = false;
   //}
-  if(true)
+  if(false)
   {
     for(let i = 0; i<trains.length; i++)
     {

@@ -92,7 +92,7 @@ function naiveEntitySetup(gl)
     
     //ASSET, shader, pos, color, texture
     trains.push(new train(-13,0,-40));
-    //trains.push(new train(-13,10,-40));
+    trains.push(new train(-13,-50,-40));
     let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
     components.push(new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
   // texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);

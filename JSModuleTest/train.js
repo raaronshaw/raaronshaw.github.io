@@ -16,6 +16,41 @@ export class train
         
         ];
     }
+    getLength()
+    {
+        let a = this.getStartPosition();
+        let b = this.getEndPosition();
+        let solution = 0;
+        solution = Math.pow(
+            Math.pow(a[0]-b[0],2)+
+            Math.pow(a[1]-b[1],2)+
+            Math.pow(a[2]-b[2],2)
+        ,0.5);
+        return solution;
+
+    }
+    getVector()
+    {
+        let a = this.getEndPosition();
+        let b = this.getStartPosition();
+        let solution = [
+            [b[0]-a[0]],
+            [b[1]-a[1]],
+            [b[2]-a[2]]
+        ];
+        
+        return solution;
+
+    }
+    getStartPosition()
+    {
+        return this.children[0].getLocation();
+    }
+    getEndPosition()
+    {
+        return this.children[this.children.length-1].getLocation();
+
+    }
     draw(gl, projectionMatrix, viewMatrix, shaderIndex)
     {
         for(let i =0; i<this.children.length; i++)
