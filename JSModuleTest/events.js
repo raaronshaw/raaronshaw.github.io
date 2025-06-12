@@ -3,6 +3,7 @@ import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
 import {components, component} from './entity.js';
 import {trains, loadTexture, defaultColor} from './webgl-demo.js';
 import {projectionMatrix} from'./draw-scene.js';
+import { squaredDistance } from './glMatrix/vec3.js';
 
 let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
@@ -17,6 +18,7 @@ let mouseLeftPos = {x:0,y:0};
 let mouseRightPos = {x:0,y:0};
 let mouseMiddlePos = {x:0,y:0};
 let xyz_select = vec3.create();
+let xyz_select_initial = vec3.create();
 let xyz_select_previous = vec3.create();
 let xyz_select_his = vec3.create();
 let his_x = 0;
@@ -152,7 +154,7 @@ export let fb_texture = 0;
       //let xyz_select = vec3.create();
       vec3.add(xyz_select, camera_position, ray_wor);
       xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
-
+      xyz_select_initial = xyz_select_previous;
   //   components.push(new component(0, 0, [xyz_select[0], xyz_select[1], xyz_select[2]], loadTexture(gl, [1.0,  0.5,  1.0], 0), defaultColor));
     }
 
@@ -310,32 +312,94 @@ function mouseMove(gl, event)
       let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
       vec3.scale(ray_wor, ray_wor, t);
       let test_train_select = 0;
+
+
       for(let i = 0; i<trains.length; i++)
       {
         for(let j = 0; j<trains[i].children.length; j++)
         {
           if(trains[i].children[j].selected == true)
           {
+
+
+            let magprojaontob = 0,
+            test_train_select = i;
+            {//testing move vector projection onto train vector to start constraining movement
+              //let a = vec3.fromValues(xyz_select[0]-xyz_select_initial[0], xyz_select[1]-xyz_select_initial[1], xyz_select[2]-xyz_select_initial[2]);
+              let a = vec3.fromValues(xyz_select[0]-xyz_select_previous[0], xyz_select[1]-xyz_select_previous[1], xyz_select[2]-xyz_select_previous[2]);
+              //a = vec3.normalize(a, a);
+
+              let b = trains[test_train_select].getVector();
+              b = vec3.normalize(b, b);
+
+              let adotb = a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+
+              let magbsquared = b[0]*b[0]+b[1]*b[1]+b[2]*b[2];
+
+              let projaontob = vec3.fromValues(adotb/magbsquared*b[0], adotb/magbsquared*b[1], adotb/magbsquared*b[2]);
+
+              magprojaontob = Math.pow(projaontob[0]*projaontob[0]+projaontob[1]*projaontob[1]+projaontob[2]*projaontob[2],0.5);
+
+              document.getElementById("t4").firstChild.nodeValue = 
+                `train and start and end `+
+                `${Math.round(magprojaontob*100)/100} `+
+                //${trains[test_train_select].getStartPosition()} 
+                //${trains[test_train_select].getEndPosition()} 
+                `${xyz_select[0]-xyz_select_previous[0]} `+
+                `${9999} 
+                pair`;   
+
+            }
+            let angle = 0;
+            {//testing angle delta for rotation of components when moved
+              let a = vec3.fromValues(xyz_select[0]-xyz_select_previous[0], xyz_select[1]-xyz_select_previous[1], xyz_select[2]-xyz_select_previous[2]);
+              a = [1,1,-1];
+              let b = trains[i].getVector();
+              let adotb = a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+              let maga = Math.pow(a[0]*a[0]+a[1]*a[1]+a[2]*a[2],0.5);
+              let magb = Math.pow(b[0]*b[0]+b[1]*b[1]+b[2]*b[2],0.5);
+              if(maga*magb==0) angle = 0;
+              else angle = Math.asin(adotb/(maga*magb));
+
+
+              if(b[0]==0) angle = 0;
+              else angle = Math.atan(-b[2]/b[0]);
+              
+              if(b[2] >= 0 &&  b[0] >=0) angle += Math.PI;
+              if(b[2] < 0  &&  b[0] >=0) angle += Math.PI;
+              if(b[2] >= 0 &&  b[0] < 0) angle += 0;//Math.PI;
+              if(b[2] < 0  &&  b[0] < 0) angle += 0;//Math.PI;
+
+              console.log(a);
+              console.log(b);
+            }
+            {//rotation
+              trains[i].children[2].setRotation(0,angle,0);
+              trains[i].children[1].setRotation(0,angle,0);
+              trains[i].children[0].setRotation(0,angle,0);
+              console.log(angle);
+            }
+
             trains[i].children[j].move([
+              //magprojaontob,//
               xyz_select[0]-xyz_select_previous[0],
-              xyz_select[1]-xyz_select_previous[1],
+              0,//xyz_select[1]-xyz_select_previous[1],
               xyz_select[2]-xyz_select_previous[2]
             ]);
-            test_train_select = i;
+            {//need to revise such that setPosition == setPositionTest (currently setPosition a move vs a set)
+              let testingxyz = trains[i].children[j].getPosition();
+              trains[i].children[j].setPositionTest(testingxyz);
+            }            
+
+            
+
           }
         }
       }
       xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
       vec3.add(xyz_select, camera_position, ray_wor);
 
-      document.getElementById("t4").firstChild.nodeValue = 
-        `train and start and end `+
-        //${test_train_select} 
-        //${trains[test_train_select].getStartPosition()} 
-        //${trains[test_train_select].getEndPosition()} 
-        //${9999999999} 
-        `${trains[test_train_select].getVector()} 
-        pair`;      
+   
     }
   }
 

@@ -29,7 +29,21 @@ export class component  {
         //console.log(this.uid);
     }
     getTranslationMatrix() {return this.translationMatrix;}
+    setRotation(x_axis, y_axis, z_axis) {
+        this.rotationMatrix = mat4.create();
+        mat4.rotate(this.rotationMatrix, this.rotationMatrix, y_axis, [0,1,0]);
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
+    rotate(x_axis, y_axis, z_axis) {
+        mat4.rotate(this.rotationMatrix, this.rotationMatrix, y_axis, [0,1,0]);
+        //mat4.rotate(out, a, rad, axis);
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
     setPosition(position){this.setTranslationMatrix(position);}
+    setPositionTest(position){
+        mat4.translate(this.translationMatrix, mat4.create(), [position[0], position[1], position[2]]); 
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
     move(xyz_change){
         this.setTranslationMatrix(xyz_change);
     }
