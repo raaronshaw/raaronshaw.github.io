@@ -1,9 +1,9 @@
-import {mat4} from './glMatrix/index.js';
+import {mat4} from './lib/glMatrix/index.js';
 import {drawEntity, drawTexturedEntity, drawEntityToFramebuffer} from './drawEntity.js';
 import {fb, debug_colours} from './events.js';
 //import {entity} from './entity.js'
 import {shader} from './shader.js';
-import {trains} from './webgl-demo.js';
+import {trains} from './conveyorLayout.js';
 export const projectionMatrix = mat4.create();
 
 function drawScene(gl, components, viewMatrix) {

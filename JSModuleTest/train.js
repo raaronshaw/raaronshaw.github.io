@@ -1,7 +1,7 @@
 import {model} from './init-buffers.js'
 import { component, components } from './entity.js';
-import {loadTexture, defaultColor} from './webgl-demo.js';
-import { vec3} from './glMatrix/index.js';
+import {loadTexture, defaultColor} from './conveyorLayout.js';
+import { vec3} from './lib/glMatrix/index.js';
 
 export class train
 {

@@ -1,4 +1,4 @@
-import {mat4, vec3, mat3} from './glMatrix/index.js';
+import {mat4, vec3, mat3} from './lib/glMatrix/index.js';
 export let GUIPanels = [];
 
 export function naiveGUISetup(gl)

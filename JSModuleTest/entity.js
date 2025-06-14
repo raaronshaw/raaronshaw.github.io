@@ -1,4 +1,4 @@
-import {mat4, vec3, mat3} from './glMatrix/index.js';
+import {mat4, vec3, mat3} from './lib/glMatrix/index.js';
 import {shader} from './shader.js';
 import {ASSETS} from './init-buffers.js';
 

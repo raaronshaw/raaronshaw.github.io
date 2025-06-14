@@ -1,17 +1,13 @@
-import {viewMatrix, deltaTime} from './webgl-demo.js';
-import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
-import {components, component} from './entity.js';
-import {trains, loadTexture, defaultColor, camera_velocity_test, camera_acceleration, accelerate} from './webgl-demo.js';
+import {viewMatrix} from './conveyorLayout.js';
+import {mat4, vec3, quat, vec4} from './lib/glMatrix/index.js';
+import {components} from './entity.js';
+import {trains, defaultColor, actuated_movement} from './conveyorLayout.js';
 import {projectionMatrix} from'./draw-scene.js';
-import { squaredDistance } from './glMatrix/vec3.js';
 
 export let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
 export let camera_orientation = quat.create();
 let speed_turn = 0.5;
-let speed_move = 10;
-let accel_a = 1;
-let accel_b = 1;
 let mouseRightDown = false;
 let mouseLeftDown = false;
 let mouseMiddleDown = false;
@@ -24,7 +20,8 @@ let xyz_select_initial = vec3.create();
 let xyz_select_previous = vec3.create();
 let xyz_select_his = vec3.create();
 let his_x = 0;
-let his_x_prev = 0;
+
+export let camera_movement = 0;
 export let downForward = false;
 export let downBack = false;
 
@@ -54,21 +51,13 @@ function modifyText() {
       });
     
     document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
-    //document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
     document.getElementById("Layout").addEventListener("mousedown", (event)=> { 
-      //document.getElementById("Layout").focus();
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       mouseDown(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     });
- /* inrpog work current fail  
-    document.getElementById("Layout").addEventListener("keydown", (event)=> { 
-      keyDown(gl, event);
-    });
-    document.getElementById("Layout").addEventListener("keyup", (event)=> { 
-      keyUp(gl, event);
-    });
-    */
+    document.getElementById("Layout").addEventListener("keydown", keyDown, false);
+    document.getElementById("Layout").addEventListener("keyup", keyUp, false);
     document.addEventListener("keypress", handleKeyPress, false);
     document.getElementById("Layout").addEventListener("dblclick", (event)=> {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
@@ -76,7 +65,6 @@ function modifyText() {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     });
     document.getElementById("Layout").addEventListener("mouseup", mouseUp, false);
-    //document.getElementById("Layout").addEventListener("mousemove", mouseMove, false);
     document.getElementById("Layout").addEventListener("mousemove", (event)=> { 
       mouseMove(gl, event);
     });
@@ -553,108 +541,81 @@ function handleMouseDown(event) {
         mouseDown = false;
     }
 
-function keyDown(gl, event)
+function keyDown(event)
 {
   let keyPressed = event.code;
-  let cam_moved = 0;
-  let movement_direction = vec3.create();  
-  if (keyPressed == 'KeyW')//w
-  {
-    downForward = true;
-//fail    accelerate([40,0,0]);
-    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
-    vec3.scale(movement_direction,movement_direction,speed_move);
-    vec3.subtract(camera_position, camera_position, movement_direction);
-    cam_moved = true;
-  }
-  else if (keyPressed == 'KeyS')//s
-  {
-    downBack = true;
-//fail    accelerate([-40,0,0]);
-    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
-    vec3.scale(movement_direction,movement_direction,speed_move);
-    vec3.add(camera_position, camera_position, movement_direction);
-    cam_moved = true;
-  }
-  if (cam_moved) 
-  { 
-    let T = mat4.create();
-    let R = mat4.create();
-    mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
-    mat4.fromQuat(R, camera_orientation);
-    mat4.multiply(viewMatrix, R, T);
-  }  
-
+  if (keyPressed == 'KeyW') camera_movement = camera_movement | actuated_movement.Forward;
+  if (keyPressed == 'KeyS') camera_movement = camera_movement | actuated_movement.Backward;
+  if (keyPressed == 'KeyA') camera_movement = camera_movement | actuated_movement.Left;
+  if (keyPressed == 'KeyD') camera_movement = camera_movement | actuated_movement.Right;
+  if (keyPressed == 'KeyF') camera_movement = camera_movement | actuated_movement.Down;
+  if (keyPressed == 'KeyR') camera_movement = camera_movement | actuated_movement.Up;
+  if (keyPressed == 'Space') camera_movement = camera_movement | actuated_movement.Up;
+  
 }
-function keyUp(gl, event){
+function keyUp(event){
   let keyPressed = event.code;
-  let cam_moved = 0;
-  let movement_direction = vec3.create();  
-  if (keyPressed == 'KeyW')//w
+  if (keyPressed == 'KeyW') camera_movement = camera_movement & ~(actuated_movement.Forward);
+  if (keyPressed == 'KeyS') camera_movement = camera_movement & ~(actuated_movement.Backward);
+  if (keyPressed == 'KeyA') camera_movement = camera_movement & ~(actuated_movement.Left);
+  if (keyPressed == 'KeyD') camera_movement = camera_movement & ~(actuated_movement.Right);
+  if (keyPressed == 'KeyF') camera_movement = camera_movement & ~(actuated_movement.Down);
+  if (keyPressed == 'KeyR') camera_movement = camera_movement & ~(actuated_movement.Up);
+  if (keyPressed == 'Space') 
   {
-    downForward = false;
-  }
-  else if (keyPressed == 'KeyS')//s
-  {
-    downBack = false;
+    event.preventDefault();
+    camera_movement = camera_movement & ~(actuated_movement.Up);
   }
 }
-
 
 function handleKeyPress(e) 
 {
-  let keyPressed = e.code;
+/*  Legacy code not used
+let keyPressed = e.code;
   let cam_moved = 0;
   let movement_direction = vec3.create();
-  if (keyPressed == 'KeyA')//a
+  let speed_move_vector = vec3.create();
+  if (keyPressed == 'KeyA' && false)//a
   {
     vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
-    vec3.scale(movement_direction,movement_direction,speed_move);
-    vec3.subtract(camera_position, camera_position, movement_direction);
+    vec3.scale(movement_direction,movement_direction,speed_move*-1);
+    vec3.add(camera_position, camera_position, movement_direction);
     cam_moved = true;
   }
-  else if (keyPressed == 'KeyD')//d
+  else if (keyPressed == 'KeyD' && false)//d
   {
     vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
     vec3.scale(movement_direction,movement_direction,speed_move);
     vec3.add(camera_position, camera_position, movement_direction);
     cam_moved = true;
   }
-  else if (keyPressed == 'KeyS')//s
+  else if (keyPressed == 'KeyW' && false)//w
+  {
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+    vec3.scale(movement_direction,movement_direction,speed_move*-1);
+    vec3.add(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }  
+  else if (keyPressed == 'KeyS' && false)//s
   {
     vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
-    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.scale(movement_direction,movement_direction,speed_move*1);
     vec3.add(camera_position, camera_position, movement_direction);
     cam_moved = true;
   }
-  else if (keyPressed == 'KeyW')//w
-  {
-    //accelerate([200,0,0]);
-    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
-    vec3.scale(movement_direction,movement_direction,speed_move);
-    vec3.subtract(camera_position, camera_position, movement_direction);
-    cam_moved = true;
-
-  }
-  else if (keyPressed == 'KeyR')//r
+  else if (keyPressed == 'KeyR' && false)//r
   {
     vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
     vec3.scale(movement_direction,movement_direction,speed_move);
     vec3.add(camera_position, camera_position, movement_direction);
     cam_moved = true;
   }
-  else if (keyPressed == 'KeyF')//f
+  else if (keyPressed == 'KeyF' && false)//f
   {
     vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
     vec3.scale(movement_direction,movement_direction,speed_move);
     vec3.subtract(camera_position, camera_position, movement_direction);
     cam_moved = true;
-  }
-  else if (keyPressed == 'KeyP')//p
-  {
-      if(debug_colours)
-        debug_colours = 0;
-      else debug_colours = 1;
   }
   if (cam_moved) 
   { 
@@ -663,9 +624,11 @@ function handleKeyPress(e)
     mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
     mat4.fromQuat(R, camera_orientation);
     mat4.multiply(viewMatrix, R, T);
+   // let det = mat4.determinant(viewMatrix);
+    //mat4.multiplyScalar(viewMatrix, viewMatrix, 1/mat4.determinant(viewMatrix));
+    //mat4.normalize(viewMatrix, viewMatrix);
   }
-
-  return;
+*/
 }
 
     function handleMouseMove(event) {
@@ -753,11 +716,5 @@ function clicktest(gl, event)
     
       
 }
- function move()
- {
 
-    console.log("clicked");
-    console.log(viewMatrix);
-
- }
  

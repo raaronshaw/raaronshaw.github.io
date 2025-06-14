@@ -7,19 +7,19 @@ import {
   VP_TAI10_48_Part001, VC_TAI10_48_Part001,
   VP_TAI10_48_Part002, VC_TAI10_48_Part002
 
-} from './Asset_Models/TAI10_48.js'
+} from './lib/models/Asset_Models/TAI10_48.js'
 
 import {
    VP_CHU01_60, VC_CHU01_60
-} from './Asset_Models/CHU01_60.js'
+} from './lib/models/Asset_Models/CHU01_60.js'
 
 import {
   VP_INT05_48, VC_INT05_48
-} from './Asset_Models/INT05_48.js'
+} from './lib/models/Asset_Models/INT05_48.js'
 
 import {
 VP_DRI02_48_Part004, VC_DRI02_48_Part004
-} from './Asset_Models/DRI02_48.js'
+} from './lib/models/Asset_Models/DRI02_48.js'
 
 function initBuffers(gl) {
     setupAssets(gl);

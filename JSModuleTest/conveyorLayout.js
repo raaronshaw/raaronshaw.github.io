@@ -3,13 +3,11 @@ import { drawScene } from './draw-scene.js';
 import { initShaderProgram } from './shader.js';
 import { component, components } from './entity.js';
 import { ASSETS } from './init-buffers.js';
-import { mat4} from './glMatrix/index.js';
-import { startCanvasEvents, fb, camera_position, camera_orientation, downForward, downBack} from './events.js';
+import { vec3, mat4} from './lib/glMatrix/index.js';
+import { startCanvasEvents, fb, camera_position, camera_orientation, camera_movement} from './events.js';
 import { naiveGUISetup } from './GUIPanels.js';
-import {shader } from './shader.js';
-import { vec3} from './glMatrix/index.js';
 import {train} from './train.js';
-let cubeRotation = 0.0;
+
 export let deltaTime = 0;
 export let defaultColor = vec3.fromValues(0.4, 0.4, 0.4);
 export let viewMatrix = mat4.create();
@@ -21,9 +19,6 @@ export let camera_velocity_vector = vec3.create();
 
 main();
 
-//
-// start here
-//
 function main() {
   const canvas = document.querySelector("#Layout");
   // Initialize the GL context
@@ -36,10 +31,10 @@ function main() {
     );
     return;
   }
-  //BEGIN: REVISE (Need to clean models to enable)
+  //BEGIN: REVISE (Need to clean models to allow for enabling)
   gl.disable(gl.CULL_FACE);
-  //END  : REVISE
   gl.cullFace(gl.BACK);
+  //END  : REVISE
   gl.enable(gl.DEPTH_TEST); // Enable depth testing
   gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
@@ -60,10 +55,9 @@ function main() {
     deltaTime = now - then;
     then = now;
 
+    cameraMovement(deltaTime, viewMatrix);
 
-    //current fail inprog work cameraMovement(deltaTime, viewMatrix);
     drawScene(gl, components, viewMatrix);
-    //colorPicker(gl, shader[2], fbb);
 
     RotateFirstCube(components, deltaTime);
     requestAnimationFrame(render);
@@ -79,58 +73,78 @@ export function accelerate(vector)
   //camera_acceleration=vector[0];
 
 }
-
+export const actuated_movement = {
+  Forward: 2,
+  Backward: 4,
+  Left: 8,
+  Right: 16,
+  Up: 32,
+  Down: 64
+};
 function cameraMovement(deltaTime, viewMatrix)
 {
+  // Need to revise to use deltaTime and acceleration to provide consistent performance across devices
+  // Need to divine how to minimize vec3.add calls. Multiple instances called to provide for combinations of movement.
 
-  let cam_moved = 0;
-  let movement_direction = vec3.create();  
-  if(downForward == true)
-  { 
-    //camera_velocity_test = camera_velocity_test + (camera_acceleration*deltaTime);
-    camera_velocity_vector[0] = camera_velocity_vector[0] + (camera_acceleration*deltaTime);
-  }
-  //if(downBack == true)
- // {
-//    camera_velocity_test = camera_velocity_test + (camera_acceleration*deltaTime);
-//  }
-  if(downForward == false)
+  let speed_move = 1;
+  let movement_direction = vec3.create();
+
+  /* Drafted Normalization for entire viewMatrix need to run performance comparison to individual vec3 normalizations. 
+  Test may be performed by 
+  if(camera_movement > 0)
   {
-    //camera_velocity_test = camera_velocity_test-(camera_velocity_test*deltaTime*10)/2;
-    camera_velocity_vector[0] = camera_velocity_vector[0] - (camera_acceleration*deltaTime*10)/2;
-  }
-//  if(downBack == false) 
- // {
- //   camera_velocity_test = camera_velocity_test-(camera_velocity_test*deltaTime*10)/2;
- // }
-  
-  vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
-  //vec3.scale(movement_direction,movement_direction,camera_velocity_test);
-  movement_direction = vec3.fromValues(
-    movement_direction[0]*camera_velocity_vector[0],
-    movement_direction[1]*camera_velocity_vector[0],
-    movement_direction[2]*camera_velocity_vector[0]);//camera_velocity_vector[2];
-  
-  cam_moved = true;
+    mat4.multiplyScalar(viewMatrix, viewMatrix, 1/mat4.determinant(viewMatrix));
+  }  
+  */
 
-  if (camera_velocity_vector[0] > 0.1) 
+  if (camera_movement & actuated_movement.Forward)//w
+  {
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+    vec3.scale(movement_direction,movement_direction,speed_move*-1);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }  
+  if (camera_movement & actuated_movement.Backward)//s
+  {
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
+    vec3.scale(movement_direction,movement_direction,speed_move*1);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }
+  if (camera_movement & actuated_movement.Left)//a
+  {
+    vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
+    vec3.scale(movement_direction,movement_direction,speed_move*-1);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }
+  if (camera_movement & actuated_movement.Right)//d
+  {
+    vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }
+  if (camera_movement & actuated_movement.Up)//r or Space
+  {
+    vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }
+  if (camera_movement & actuated_movement.Down) //f
+  {
+    vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+    vec3.scale(movement_direction,movement_direction,speed_move*-1);
+    vec3.add(camera_position, camera_position, movement_direction);
+  }      
+  if (camera_movement>0) 
   { 
-    vec3.subtract(camera_position, camera_position, movement_direction);
-    console.log(camera_velocity_vector[0]);
+    vec3.add(camera_position, camera_position, movement_direction);
     let T = mat4.create();
     let R = mat4.create();
     mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
     mat4.fromQuat(R, camera_orientation);
     mat4.multiply(viewMatrix, R, T);
-  }  
+  }
 }
 
-function colorPicker(gl, shaderProgramme, fbb)
-{
-  
-}
-
-
+//Example of animation for reference only
 function RotateFirstCube(components, deltaTime)
 {
   let speed = 1.0;

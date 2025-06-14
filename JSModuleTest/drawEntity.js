@@ -1,5 +1,5 @@
 import {ASSETS} from './init-buffers.js';
-import {mat4} from './glMatrix/index.js';
+import {mat4} from './lib/glMatrix/index.js';
 import {fb, debug_colours} from './events.js';
 import {shader} from './shader.js';
 
@@ -29,7 +29,6 @@ function drawEntity(gl, projectionMatrix, viewMatrix, entity, batchskip)
     gl.drawArrays(gl.TRIANGLES, 0, ASSETS[entity.assetIndex].numItems);
   }
 }
-
 
 function drawTexturedEntity(gl, projectionMatrix, viewMatrix, entity, batchskip)
 {
