@@ -4,16 +4,19 @@ import { initShaderProgram } from './shader.js';
 import { component, components } from './entity.js';
 import { ASSETS } from './init-buffers.js';
 import { mat4} from './glMatrix/index.js';
-import { startCanvasEvents, fb} from './events.js';
+import { startCanvasEvents, fb, camera_position, camera_orientation, downForward, downBack} from './events.js';
 import { naiveGUISetup } from './GUIPanels.js';
 import {shader } from './shader.js';
 import { vec3} from './glMatrix/index.js';
 import {train} from './train.js';
 let cubeRotation = 0.0;
-let deltaTime = 0;
+export let deltaTime = 0;
 export let defaultColor = vec3.fromValues(0.4, 0.4, 0.4);
 export let viewMatrix = mat4.create();
 export let trains = [];
+export let camera_velocity_test = 0;
+export let camera_acceleration = 0;
+export let camera_velocity_vector = vec3.create();
 
 
 main();
@@ -51,19 +54,75 @@ function main() {
 
   // Draw the scene repeatedly
   let then = 0;
-  function render(now) {
+  function render(now) 
+  {
     now *= 0.001; // convert to seconds
     deltaTime = now - then;
     then = now;
 
+
+    //current fail inprog work cameraMovement(deltaTime, viewMatrix);
     drawScene(gl, components, viewMatrix);
-    colorPicker(gl, shader[2], fbb);
+    //colorPicker(gl, shader[2], fbb);
 
     RotateFirstCube(components, deltaTime);
     requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
+}
+
+export function accelerate(vector)
+{
+  camera_acceleration=vector[0];
+  //camera_acceleration=vector[1];
+  //camera_acceleration=vector[0];
+
+}
+
+function cameraMovement(deltaTime, viewMatrix)
+{
+
+  let cam_moved = 0;
+  let movement_direction = vec3.create();  
+  if(downForward == true)
+  { 
+    //camera_velocity_test = camera_velocity_test + (camera_acceleration*deltaTime);
+    camera_velocity_vector[0] = camera_velocity_vector[0] + (camera_acceleration*deltaTime);
+  }
+  //if(downBack == true)
+ // {
+//    camera_velocity_test = camera_velocity_test + (camera_acceleration*deltaTime);
+//  }
+  if(downForward == false)
+  {
+    //camera_velocity_test = camera_velocity_test-(camera_velocity_test*deltaTime*10)/2;
+    camera_velocity_vector[0] = camera_velocity_vector[0] - (camera_acceleration*deltaTime*10)/2;
+  }
+//  if(downBack == false) 
+ // {
+ //   camera_velocity_test = camera_velocity_test-(camera_velocity_test*deltaTime*10)/2;
+ // }
+  
+  vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+  //vec3.scale(movement_direction,movement_direction,camera_velocity_test);
+  movement_direction = vec3.fromValues(
+    movement_direction[0]*camera_velocity_vector[0],
+    movement_direction[1]*camera_velocity_vector[0],
+    movement_direction[2]*camera_velocity_vector[0]);//camera_velocity_vector[2];
+  
+  cam_moved = true;
+
+  if (camera_velocity_vector[0] > 0.1) 
+  { 
+    vec3.subtract(camera_position, camera_position, movement_direction);
+    console.log(camera_velocity_vector[0]);
+    let T = mat4.create();
+    let R = mat4.create();
+    mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+    mat4.fromQuat(R, camera_orientation);
+    mat4.multiply(viewMatrix, R, T);
+  }  
 }
 
 function colorPicker(gl, shaderProgramme, fbb)
@@ -92,7 +151,7 @@ function naiveEntitySetup(gl)
     
     //ASSET, shader, pos, color, texture
     trains.push(new train(-13,0,-40));
-    trains.push(new train(-13,-50,-40));
+    trains.push(new train(-13,-50,-100));
     let texture = loadTexture(gl, [0.5,  0.5,  0.5], "./test_image.png");
     components.push(new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor));
   // texture = loadTexture(gl, [1.0,  0.5,  1.0], 0);
@@ -171,18 +230,6 @@ export function loadTexture(gl, defaultcolor, url) {
 function isPowerOf2(value) {
   return (value & (value - 1)) === 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function initTexture(gl) {

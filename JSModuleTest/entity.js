@@ -9,6 +9,7 @@ export class component  {
         constructor(assetIndex, shaderIndex, position, texture, Kd) {
         this.uid = counter++;
         this.selected = 0;
+        this.scale = 1;
         if(assetIndex == undefined) this.assetIndex = 0;
         else this.assetIndex = assetIndex;
         if(shaderIndex == undefined) this.shaderIndex = 0; 
@@ -28,6 +29,7 @@ export class component  {
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
         //console.log(this.uid);
     }
+    getRotationMatrix() {return this.rotationMatrix;}
     getTranslationMatrix() {return this.translationMatrix;}
     setRotation(x_axis, y_axis, z_axis) {
         this.rotationMatrix = mat4.create();
@@ -63,7 +65,31 @@ export class component  {
     setRotationMatrix(R)
     {
         this.rotationMatrix = R;
-        this.setTransformationMatrix(this.translationMatrix, R);
+        this.setTransformationMatrix(this.transformationMatrix, R);
+    }
+
+    setScaleMatrix(ratio)
+    {
+        //ratio=2;
+        let S = mat4.create();
+        mat4.fromScaling(S, [ratio, 1, 1]);
+        let inbetween = mat4.create();
+        //mat4.multiply(inbetween, this.translationMatrix, S); 
+        //mat4.multiply(this.transformationMatrix, inbetween, this.rotationMatrix); 
+       
+        //mat4.multiply(inbetween, S, this.translationMatrix); 
+       // mat4.multiply(this.transformationMatrix, inbetween, this.rotationMatrix); 
+
+        mat4.multiply(inbetween, this.translationMatrix, this.rotationMatrix); 
+        mat4.multiply(this.transformationMatrix, inbetween, S); 
+        //let TRS = mat4.fromValues(TR);//mat4.create();
+        //mat4.multiply(TRS, TR, S);
+        
+        //this.transformationMatrix = mat4.fromValues(TRS);
+
+        //this.setTransformationMatrix(this.translationMatrix, R);
+        //this.setTransformationMatrix(this.transformationMatrix, this.rotationMatrix);
+        
     }
     
     draw(gl, projectionMatrix, viewMatrix, shaderIndex)

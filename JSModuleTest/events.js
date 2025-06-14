@@ -1,15 +1,17 @@
-import {viewMatrix} from './webgl-demo.js';
+import {viewMatrix, deltaTime} from './webgl-demo.js';
 import {mat4, vec3, quat, vec4} from './glMatrix/index.js';
 import {components, component} from './entity.js';
-import {trains, loadTexture, defaultColor} from './webgl-demo.js';
+import {trains, loadTexture, defaultColor, camera_velocity_test, camera_acceleration, accelerate} from './webgl-demo.js';
 import {projectionMatrix} from'./draw-scene.js';
 import { squaredDistance } from './glMatrix/vec3.js';
 
-let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
+export let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
-let camera_orientation = quat.create();
+export let camera_orientation = quat.create();
 let speed_turn = 0.5;
-let speed_move = 0.5;
+let speed_move = 10;
+let accel_a = 1;
+let accel_b = 1;
 let mouseRightDown = false;
 let mouseLeftDown = false;
 let mouseMiddleDown = false;
@@ -23,8 +25,12 @@ let xyz_select_previous = vec3.create();
 let xyz_select_his = vec3.create();
 let his_x = 0;
 let his_x_prev = 0;
+export let downForward = false;
+export let downBack = false;
 
 export let debug_colours = 0;
+export let fb = 0;
+export let fb_texture = 0;
 
 function modifyText() {
     const t2 = document.getElementById("t2");
@@ -46,14 +52,24 @@ function modifyText() {
       clicktest(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       });
-    document.addEventListener("keypress", handleKeyPress, false);
+    
     document.getElementById("Layout").addEventListener("contextmenu", (event) => { event.preventDefault(); /*removes default right click menu may be used to show a custom context menu*/ });
     //document.getElementById("Layout").addEventListener("mousedown", mouseDown, false);
     document.getElementById("Layout").addEventListener("mousedown", (event)=> { 
+      //document.getElementById("Layout").focus();
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       mouseDown(gl, event);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     });
+ /* inrpog work current fail  
+    document.getElementById("Layout").addEventListener("keydown", (event)=> { 
+      keyDown(gl, event);
+    });
+    document.getElementById("Layout").addEventListener("keyup", (event)=> { 
+      keyUp(gl, event);
+    });
+    */
+    document.addEventListener("keypress", handleKeyPress, false);
     document.getElementById("Layout").addEventListener("dblclick", (event)=> {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
       dblClick(gl, event);
@@ -67,27 +83,12 @@ function modifyText() {
     return fbb;
  }
 
- export let fb = 0;
-export let fb_texture = 0;
+
  function initializeColorBasedMousePicking(gl)
  {
   // create framebuffer 
   fb = gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
- 
- /* Use if renderbuffer becomes depreciated
-  let depth_texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, depth_texture);
-  const data = null;
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-                gl.canvas.clientWidth, gl.canvas.clientHeight, 0,
-                gl.RGBA, gl.UNSIGNED_BYTE, null);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
-*/
 // create a depth renderbuffer
   let depthBuffer = gl.createRenderbuffer();
   gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
@@ -370,25 +371,128 @@ function mouseMove(gl, event)
               if(b[2] >= 0 &&  b[0] < 0) angle += 0;//Math.PI;
               if(b[2] < 0  &&  b[0] < 0) angle += 0;//Math.PI;
 
-              console.log(a);
-              console.log(b);
+              {//fail attempt to use dot product to find angle vs expensive arctan
+                let v = [-1,1];
+                let w = [b[0], b[2]];
+                let vdotw = v[0]*w[0]+v[1]*w[1];
+                let magv = Math.pow(v[0]*v[0] + v[1]*v[1],0.5);
+                let magw = Math.pow(w[0]*w[0] + w[1]*w[1],0.5);
+                let angletest = 0
+                if(magv*magw==0) angletest = 0
+                else angletest = Math.acos( vdotw / (magv*magw));
+                if(b[0]==0) angletest = 0
+                else angletest = Math.acos( b[2]/b[0]);
+                //console.log(angle-angletest);
+              }
+
+
             }
             {//rotation
               trains[i].children[2].setRotation(0,angle,0);
               trains[i].children[1].setRotation(0,angle,0);
               trains[i].children[0].setRotation(0,angle,0);
-              console.log(angle);
+              //console.log(angle);
             }
 
             trains[i].children[j].move([
               //magprojaontob,//
               xyz_select[0]-xyz_select_previous[0],
-              0,//xyz_select[1]-xyz_select_previous[1],
+              xyz_select[1]-xyz_select_previous[1],
               xyz_select[2]-xyz_select_previous[2]
             ]);
             {//need to revise such that setPosition == setPositionTest (currently setPosition a move vs a set)
-              let testingxyz = trains[i].children[j].getPosition();
-              trains[i].children[j].setPositionTest(testingxyz);
+              //let testingxyz = trains[i].children[j].getPosition();
+              //trains[i].children[j].setPositionTest(testingxyz);
+            }
+            {//set intermediate location//static need revision for dynamic
+              let temp_xyz = [0, 0, 0]
+              let begin = trains[i].children[0].getPosition();
+              let begin_origin = begin;
+              let begin_scale = vec3.create();
+              vec3.scale(begin_scale, trains[i].getVector(), -2.5);
+              let begin_adjust = vec3.create();
+              vec3.add(begin_adjust, begin_scale, begin);
+              
+              let end = trains[i].children[2].getPosition();
+              let end_origin = end;
+              let end_scale = vec3.create()
+              vec3.scale(end_scale, trains[i].getVector(), 1);
+              let end_adjust = vec3.create();
+              vec3.add(end_adjust, end_scale, end);
+              
+              let c = vec3.create();
+              vec3.subtract(c, end_adjust, begin_adjust);
+              vec3.scale(c, c, 0.5);
+              vec3.add(c, end, c);
+
+              let a_begin = mat4.create();
+              let b_begin = mat4.create();
+              let x_begin = [begin_origin[0]+25, begin_origin[1], begin_origin[2]];
+              //x_begin[0] = x_begin[0]-165;
+              mat4.translate(a_begin, mat4.create(), [x_begin[0], x_begin[1], x_begin[2]]);
+              mat4.multiply(b_begin, a_begin, trains[i].children[0].getRotationMatrix()); 
+
+              let f_begin = mat4.create();
+              let g_begin = mat4.create();
+              let y_begin = [end_origin[0]-53, end_origin[1], end_origin[2]];
+              //x_begin[0] = x_begin[0]-165;
+              mat4.translate(f_begin, mat4.create(), [y_begin[0], y_begin[1], y_begin[2]]);
+              mat4.multiply(g_begin, f_begin, trains[i].children[2].getRotationMatrix());               
+
+ //             trains[i].children[0].setPositionTest(begin_origin);
+   //           trains[i].children[1].setPositionTest(c);
+     //         trains[i].children[2].setPositionTest(end_origin);
+
+              let d_log = vec3.distance(end_origin, begin_origin);
+              let e_log = vec3.distance(
+                [
+                  g_begin[12],
+                  g_begin[13],
+                  g_begin[14]                  
+                ],
+                [
+                  b_begin[12],
+                  b_begin[13],
+                  b_begin[14]
+                ]
+
+              );
+
+
+
+              console.log("woo");
+              console.log(d_log);
+              console.log(e_log);
+              {
+                  //25 TAI/
+                  // 1 INT/
+                  //53 DRI/
+                  //79 TTL
+                let aa = 24;
+                let bb = 54;
+                let aaa = trains[i].children[0].getPosition();
+                let bbb = trains[i].children[2].getPosition();
+                let dd = vec3.distance(aaa, bbb);
+
+                let ratio = ((dd-aa-bb)/2+aa)/dd;
+                let vectoroftrain = vec3.create();
+                vec3.scale(vectoroftrain, trains[i].getVector(), ratio);
+                let movetopos = vec3.create();
+                vec3.subtract(movetopos, aaa, vectoroftrain);
+
+                trains[i].children[1].setPositionTest(
+                  movetopos
+                );
+                
+                trains[i].children[1].setScaleMatrix(dd-aa-bb);
+                //trains[i].children[1].setScaleMatrix(10);
+
+              }
+
+
+
+
+
             }            
 
             
@@ -449,72 +553,120 @@ function handleMouseDown(event) {
         mouseDown = false;
     }
 
+function keyDown(gl, event)
+{
+  let keyPressed = event.code;
+  let cam_moved = 0;
+  let movement_direction = vec3.create();  
+  if (keyPressed == 'KeyW')//w
+  {
+    downForward = true;
+//fail    accelerate([40,0,0]);
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.subtract(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyS')//s
+  {
+    downBack = true;
+//fail    accelerate([-40,0,0]);
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  if (cam_moved) 
+  { 
+    let T = mat4.create();
+    let R = mat4.create();
+    mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+    mat4.fromQuat(R, camera_orientation);
+    mat4.multiply(viewMatrix, R, T);
+  }  
 
-    function handleKeyPress(e) 
-    {
-     
-      let keyPressed = e.code;
-      let cam_moved = 0;
-      let movement_direction = vec3.create();
-      if (keyPressed == 'KeyA')//a
-      {
-        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.subtract(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyD')//d
-      {
-        vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.add(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyS')//s
-      {
-        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.add(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyW')//w
-      {
-        vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.subtract(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyR')//r
-      {
-        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.add(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyF')//f
-      {
-        vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
-        vec3.scale(movement_direction,movement_direction,speed_move);
-        vec3.subtract(camera_position, camera_position, movement_direction);
-        cam_moved = true;
-      }
-      else if (keyPressed == 'KeyP')//p
-      {
-          if(debug_colours)
-            debug_colours = 0;
-          else debug_colours = 1;
-      }
-      if (cam_moved) 
-      { 
-        let T = mat4.create();
-        let R = mat4.create();
-        mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
-        mat4.fromQuat(R, camera_orientation);
-        mat4.multiply(viewMatrix, R, T);
-      }
+}
+function keyUp(gl, event){
+  let keyPressed = event.code;
+  let cam_moved = 0;
+  let movement_direction = vec3.create();  
+  if (keyPressed == 'KeyW')//w
+  {
+    downForward = false;
+  }
+  else if (keyPressed == 'KeyS')//s
+  {
+    downBack = false;
+  }
+}
 
-      return;
-    }
+
+function handleKeyPress(e) 
+{
+  let keyPressed = e.code;
+  let cam_moved = 0;
+  let movement_direction = vec3.create();
+  if (keyPressed == 'KeyA')//a
+  {
+    vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.subtract(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyD')//d
+  {
+    vec3.normalize(movement_direction, [viewMatrix[0], viewMatrix[4], viewMatrix[8]]);//, viewMatrix[fourth]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyS')//s
+  {
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);//, viewMatrix[fourth]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyW')//w
+  {
+    //accelerate([200,0,0]);
+    vec3.normalize(movement_direction, [viewMatrix[2], viewMatrix[6], viewMatrix[10]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.subtract(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+
+  }
+  else if (keyPressed == 'KeyR')//r
+  {
+    vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.add(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyF')//f
+  {
+    vec3.normalize(movement_direction, [viewMatrix[1], viewMatrix[5], viewMatrix[9]]);
+    vec3.scale(movement_direction,movement_direction,speed_move);
+    vec3.subtract(camera_position, camera_position, movement_direction);
+    cam_moved = true;
+  }
+  else if (keyPressed == 'KeyP')//p
+  {
+      if(debug_colours)
+        debug_colours = 0;
+      else debug_colours = 1;
+  }
+  if (cam_moved) 
+  { 
+    let T = mat4.create();
+    let R = mat4.create();
+    mat4.translate(T, mat4.create(), [-camera_position[0], -camera_position[1], -camera_position[2]]);
+    mat4.fromQuat(R, camera_orientation);
+    mat4.multiply(viewMatrix, R, T);
+  }
+
+  return;
+}
 
     function handleMouseMove(event) {
         if (!mouseDown) {
