@@ -428,10 +428,11 @@ function mouseMove(gl, event)
 
 
             }
-            {//rotation
-              trains[i].children[2].setRotation(0,angle,0);
-              trains[i].children[1].setRotation(0,angle,0);
-              trains[i].children[0].setRotation(0,angle,0);
+            if(true){//rotation
+              trains[i].rotate(angle, [0,1,0]);
+              //trains[i].children[2].setRotation(0,angle,0);
+              //trains[i].children[1].setRotation(0,angle,0);
+              //trains[i].children[0].setRotation(0,angle,0);
               //console.log(angle);
             }
 

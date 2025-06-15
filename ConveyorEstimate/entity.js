@@ -31,9 +31,14 @@ export class component  {
     }
     getRotationMatrix() {return this.rotationMatrix;}
     getTranslationMatrix() {return this.translationMatrix;}
-    setRotation(x_axis, y_axis, z_axis) {
+/*    setRotation(x_axis, y_axis, z_axis) {
         this.rotationMatrix = mat4.create();
         mat4.rotate(this.rotationMatrix, this.rotationMatrix, y_axis, [0,1,0]);
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }*/
+    setRotation(angle, axis) {
+        this.rotationMatrix = mat4.create();
+        mat4.rotate(this.rotationMatrix, this.rotationMatrix, angle, axis);
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
     }
     rotate(x_axis, y_axis, z_axis) {

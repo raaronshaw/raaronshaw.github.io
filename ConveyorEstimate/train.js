@@ -35,6 +35,18 @@ export class train
         return solution;
 
     }
+    rotate(angle, axis)
+    {
+          //  document.querySelectorAll(".Conveyor_Component").forEach(function(element){
+        //element.addEventListener("click", buttonClick, false);});
+        this.children.forEach(
+            function(child)
+            {
+                child.setRotation(angle, axis);
+            }
+        );
+
+    }
     getVector()
     {
         let a = this.getEndPosition();
