@@ -5,16 +5,21 @@ import { vec3} from './lib/glMatrix/index.js';
 
 export class train
 {
-    constructor(x, y, z){
+    constructor(x, y, z, components){
         this.start = vec3.fromValues(x,y,z);
         this.end = vec3.fromValues(x+10, y, z);
         this.selected = false;
+        this.children = [];
+        if(components!=undefined)
+            for(const child of components)
+                this.children.push(child);
+    }
+    testInitiate()
+    {
         this.children = [
-            new component(model.TAI10_48, 0, [ x,      y, z], 0, defaultColor),
-            new component(model.INT05_48, 0, [ x+30-5.5,    y, z], 0, defaultColor), 
-            new component(model.DRI02_48, 0, [ x+80-1,   y, z], 0, defaultColor)//,
-            //new component(model.CHU01_60, 0, [ x+100,   y, z], 0, defaultColor)
-        
+            new component(model.TAI10_48, 0, [ this.start[0],        this.start[1], this.start[2]], 0, defaultColor),
+            new component(model.INT05_48, 0, [ this.start[0]+30-5.5, this.start[1], this.start[2]], 0, defaultColor), 
+            new component(model.DRI02_48, 0, [ this.start[0]+80-1,   this.start[1], this.start[2]], 0, defaultColor)//,
         ];
     }
     getLength()

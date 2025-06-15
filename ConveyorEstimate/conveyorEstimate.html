@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-    test0
   <head>
     <meta charset="utf-8" />
     <title>Conveyor Layout</title>
       <script src='./conveyorLayout.js' type="module"></script>
-   
   </head>
-  test1
+
   <body>
-    <canvas id='Layout' width='480' height='480' tabindex="0"></canvas><!-- tabindex required to make canvas focusable allowing keydown event to fire only when canvas is in focus-->
     <table id="outside">
-        <tr>
-          <td id="t1">one</td>
-        <tr>
-          <td id="t2">two</td>
-        </tr>
-          <td id="t3">testing</td>
-        </tr>
-          Naive Cost Summary from concatenated strings derived from JS [Not yet implemented]
-          <td id="t4">testing</td>
-        </tr>
-      </table>
+      <tr>
+        <td id="WebGL_Models">
+          <button type="button" class="Conveyor Component" id="DRI">DRI</button><br>
+          <button type="button" class="Conveyor Component" id="TAI">TAI</button><br>
+          <button type="button" class="Conveyor Component" id="NOS">NOS</button><br>
+          <button type="button" class="Conveyor Component" id="HIT">HIT</button><br>
+          <button type="button" class="Conveyor Component" id="CHU01_60">CHU</button>
+        </td>
+        <td id="WebGL"><canvas id='Layout' width='480' height='480' tabindex="0"></canvas><!-- tabindex required to make canvas focusable allowing keydown event to fire only when canvas is in focus--></td>
+      </tr>
+      <tr>
+        <td id="t2" colspan="2">Naive Cost Summary from concatenated strings derived from JS [Not yet implemented]</td>
+      </tr>
+    </table>
   </body>
-  test2
+
 </html>

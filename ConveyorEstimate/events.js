@@ -1,8 +1,10 @@
 import {viewMatrix} from './conveyorLayout.js';
 import {mat4, vec3, quat, vec4} from './lib/glMatrix/index.js';
-import {components} from './entity.js';
+import {components, component} from './entity.js';
 import {trains, defaultColor, actuated_movement} from './conveyorLayout.js';
 import {projectionMatrix} from'./draw-scene.js';
+import {model} from './init-buffers.js';
+import {train} from './train.js';
 
 export let camera_position = vec3.fromValues(0.0, 0.0, 0.0);
 
@@ -68,9 +70,61 @@ function modifyText() {
     document.getElementById("Layout").addEventListener("mousemove", (event)=> { 
       mouseMove(gl, event);
     });
+    document.getElementById("DRI").addEventListener("click", buttonClick, false);
+    document.getElementById("TAI").addEventListener("click", buttonClick, false);
+    document.getElementById("NOS").addEventListener("click", buttonClick, false);
+    document.getElementById("HIT").addEventListener("click", buttonClick, false);
+    document.getElementById("CHU01_60").addEventListener("click", buttonClick, false);
+    document.querySelectorAll('.Conveyor Component').forEach(function(element){
+        element.addEventListener("click", buttonClick, false);});
+    //document.getElementsByClassName("Conveyor Component");//.addEventListener("click", buttonClick, false);
     return fbb;
  }
 
+function buttonClick(event)
+{
+  if(event.target.id=="CHU01_60")//temp start work on add via button
+  {
+    //new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor)
+    //new component(model.TAI10_48, 0, [ this.start[0],        this.start[1], this.start[2]], 0, defaultColor),
+    let x = 0;
+    let y = 0;
+    let z = 0;
+
+    let testcomponents = [new component(model.CHU01_60, 0, [x,y,z],0, defaultColor)]
+        
+    trains.push
+    (
+      new train
+      (
+        x, y, z, testcomponents
+      )
+    );
+    //trains.push(new train(-50,-100,-100));
+    //trains[trains.length-1].testInitiate();
+
+
+    //console.log("test click chu");
+  }
+  //console.log(event.target.id);
+  //if(event.target.className=="component")
+  //{
+  //  console.log(event.target.className);
+ // }
+
+ /* export const model = {
+  Cube: 0,
+  Square: 1,
+  TAI10_48: 2,
+  INT05_48: 3,
+  DRI02_48: 4,
+  CHU01_60: 5
+};*/
+
+ // console.log(event.target.id);
+//  console.log(model["TAI10_48"]);
+
+}
 
  function initializeColorBasedMousePicking(gl)
  {
@@ -151,7 +205,7 @@ function modifyText() {
       let pixels = new Uint8Array(1 * 1 * 4,);
       gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
       let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
-      document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
+      //document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
       for(let i = 0; i<components.length ; i++)
         components[i].Kd = defaultColor;
       //if(index>0)
@@ -210,8 +264,8 @@ function dblClick(gl, event)
   let pixels = new Uint8Array(1 * 1 * 4,);
   gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
-  document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
-  console.log("dblclick");
+  //document.getElementById("t3").firstChild.nodeValue = `Index ${pixels[0]*1+pixels[1]*256+pixels[2]*256*256} Selected`;
+  //console.log("dblclick");
   let selected = [];
   for(let i = 0; i<trains.length; i++)
   {
@@ -329,14 +383,14 @@ function mouseMove(gl, event)
 
               magprojaontob = Math.pow(projaontob[0]*projaontob[0]+projaontob[1]*projaontob[1]+projaontob[2]*projaontob[2],0.5);
 
-              document.getElementById("t4").firstChild.nodeValue = 
+             /* document.getElementById("t4").firstChild.nodeValue = 
                 `train and start and end `+
                 `${Math.round(magprojaontob*100)/100} `+
                 //${trains[test_train_select].getStartPosition()} 
                 //${trains[test_train_select].getEndPosition()} 
                 `${xyz_select[0]-xyz_select_previous[0]} `+
                 `${9999} 
-                pair`;   
+                pair`;   */
 
             }
             let angle = 0;
@@ -448,9 +502,9 @@ function mouseMove(gl, event)
 
 
 
-              console.log("woo");
-              console.log(d_log);
-              console.log(e_log);
+              //console.log("woo");
+             // console.log(d_log);
+              //console.log(e_log);
               {
                   //25 TAI/
                   // 1 INT/
