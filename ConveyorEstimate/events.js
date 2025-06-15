@@ -70,18 +70,13 @@ function modifyText() {
     document.getElementById("Layout").addEventListener("mousemove", (event)=> { 
       mouseMove(gl, event);
     });
-    document.getElementById("DRI").addEventListener("click", buttonClick, false);
-    document.getElementById("TAI").addEventListener("click", buttonClick, false);
-    document.getElementById("NOS").addEventListener("click", buttonClick, false);
-    document.getElementById("HIT").addEventListener("click", buttonClick, false);
-    document.getElementById("CHU01_60").addEventListener("click", buttonClick, false);
-    document.querySelectorAll('.Conveyor Component').forEach(function(element){
+
+    document.querySelectorAll(".Conveyor_Component").forEach(function(element){
         element.addEventListener("click", buttonClick, false);});
-    //document.getElementsByClassName("Conveyor Component");//.addEventListener("click", buttonClick, false);
-    window.addEventListener('blur', () => {
-  //console.log('Document lost focus');   
-      camera_movement = 0;
-    });
+    
+    //consider setting canvas focus when mouseover so user does not have to click on canvas to enable camera movement.
+    document.getElementById("Layout").addEventListener('blur', () => {camera_movement = 0;});
+
     return fbb;
  }
 
@@ -95,13 +90,13 @@ function buttonClick(event)
     let y = 0;
     let z = 0;
 
-    let testcomponents = [new component(model.CHU01_60, 0, [x,y,z],0, defaultColor)]
+    let testcomponents = 
         
     trains.push
     (
       new train
       (
-        x, y, z, testcomponents
+        x, y, z, [new component(model[event.target.id], 0, [x,y,z],0, defaultColor)]
       )
     );
     //trains.push(new train(-50,-100,-100));
