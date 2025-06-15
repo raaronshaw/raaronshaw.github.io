@@ -78,6 +78,10 @@ function modifyText() {
     document.querySelectorAll('.Conveyor Component').forEach(function(element){
         element.addEventListener("click", buttonClick, false);});
     //document.getElementsByClassName("Conveyor Component");//.addEventListener("click", buttonClick, false);
+    window.addEventListener('blur', () => {
+  //console.log('Document lost focus');   
+      camera_movement = 0;
+    });
     return fbb;
  }
 
