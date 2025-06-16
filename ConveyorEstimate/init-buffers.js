@@ -35,6 +35,38 @@ export const model = {
   DRI02_48: 4,
   CHU01_60: 5
 };
+                  //24 TAI/
+                  // 1 INT/
+                  //54 DRI/
+                  //79 TTL
+//index, width, length, snaps
+/*export const modelData = {
+  Cube: 0,
+  Square: 1,
+  TAI10_48: [2, 0, 24, []],
+  INT05_48: [3, 48, 1, []],
+  DRI02_48: [4, 48, 54, []],
+  CHU01_60: 5
+};*/
+
+/*export class modelData
+{
+
+  constructor(name, width, length, snaps)
+  {
+    this.name = name;
+    this.width = width;
+    this.length = length;
+    this.snaps = snaps;
+  }
+}*/
+/*export const modelData =
+{
+name: "empty",
+name: 1,
+length: 1,
+snapes: []
+};*/
 
 function setupAssets(gl){
 let VP, VC, TC, num = 0;
@@ -217,7 +249,7 @@ let VP, VC, TC, num = 0;
   ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
 }
 
-{//"TAI-10-48"
+{//"TAI10_48"
     VP = VP_TAI10_48_Part001;
     VP = VP.concat(VP_TAI10_48_Part002);
 
@@ -238,9 +270,22 @@ let VP, VC, TC, num = 0;
     gl.bindBuffer(gl.ARRAY_BUFFER, TC_Buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(TC), gl.STATIC_DRAW);
         
-    let numItems = VP.length/3;
+    //let numItems = VP.length/3;
 
-    ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+    //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+    ASSETS.push({
+      VP_Buffer, 
+      VC_Buffer, 
+      TC_Buffer, 
+      numItems: VP.length/3, 
+      modelData:
+      {
+        name: "TAI10_48",
+        width: 48,
+        length: 24,
+        snaps: []
+      }
+    });
 }
 
 {//INT05-48
@@ -284,7 +329,25 @@ let VP, VC, TC, num = 0;
       
   let numItems = VP.length/3;
 
-  ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+  //let attributes = new modelData("DRI02_48", 1, 1, []);
+  //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems, attributes});
+  //let attributes = new modelData("DRI02_48", 1, 1, []);
+  //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems, attributes});
+  //let attributes = new modelData("DRI02_48", 1, 1, []);
+  //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems, new modelData("DRI02_48", 1, 1, [])});
+  ASSETS.push({
+    VP_Buffer, 
+    VC_Buffer, 
+    TC_Buffer, 
+    numItems: VP.length/3, 
+    modelData:
+    {
+      name: "DRI02_48",
+      width: 48,
+      length: -54,
+      snaps: []
+    }
+  });
 }
 
 {//CHU01_60
