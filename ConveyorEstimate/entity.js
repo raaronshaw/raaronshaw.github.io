@@ -29,6 +29,8 @@ export class component  {
         this.rotationMatrix = mat4.create();
         this.transformationMatrix = mat4.create();
         if(position != undefined) this.setTranslationMatrix(position);
+        else this.setTranslationMatrix([0,0,0]);
+        this.setElevation(this.getPosition()[1]);
         this.scalingMatrix = mat4.create();
         this.rotationMatrix = mat4.create();
         if (texture == undefined) this.texture = 0;
@@ -49,12 +51,13 @@ export class component  {
         mat4.rotate(this.rotationMatrix, this.rotationMatrix, y_axis, [0,1,0]);
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
     }*/
-   getQuaternion() {
-    let out_r = mat4.create();
-    let out_t = mat4.create();
-    let out_s = mat4.create();
-    return mat4.decompose(out_r, out_t, out_s, this.transformationMatrix);
-   }
+    getQuaternion() 
+    {
+        let out_r = mat4.create();
+        let out_t = mat4.create();
+        let out_s = mat4.create();
+        return mat4.decompose(out_r, out_t, out_s, this.transformationMatrix);
+    }
     setRotation(angle, axis) {
         this.rotationMatrix = mat4.create();
         mat4.rotate(this.rotationMatrix, this.rotationMatrix, angle, axis);
@@ -65,7 +68,11 @@ export class component  {
         //mat4.rotate(out, a, rad, axis);
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
     }
-    setPosition(position){this.setTranslationMatrix(position);}
+    //setPosition(position){this.setTranslationMatrix(position);}
+    setPosition(position){
+        mat4.translate(this.translationMatrix, mat4.create(), [position[0], position[1], position[2]]); 
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
     setPositionTest(position){
         mat4.translate(this.translationMatrix, mat4.create(), [position[0], position[1], position[2]]); 
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
@@ -77,6 +84,21 @@ export class component  {
     move(xyz_change){
         this.setTranslationMatrix(xyz_change);
     }
+    setElevation(elevation)
+    {
+        this.elevation = elevation;
+        let current_position = this.getPosition();
+        current_position[1] = elevation;
+        this.setPosition(current_position);
+    }
+    resetElevation()
+    {
+        let current_position = this.getPosition();
+        current_position[1] = this.elevation;
+        console.log(current_position[1]);
+        this.setPosition(current_position);
+    }
+    getElevation() {return this.elevation};
     getTransformationMatrix()
     {
         return this.transformationMatrix;

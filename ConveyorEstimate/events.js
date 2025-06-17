@@ -316,6 +316,13 @@ function mouseUp(event)
   {
     mouseLeftDown = false;
     mouseLeftPos = {x:event.clientX, y:event.clientY};
+    for(let i =0; i<trains.length; i++)
+    {
+      for(let j = 0; j<trains[i].children.length; j++)
+      {
+        trains[i].children[j].setElevation(trains[i].children[j].getPosition()[1]);
+      }
+    }
   }
   if(event.button==1)
   {
@@ -363,8 +370,12 @@ function mouseMove(gl, event)
         //Dhattestone = ray_wor;
         vec3.normalize(ray_wor, ray_wor);
         
-        let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + 0.0) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
+        let y_offset = 0;
+
+        let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + y_offset) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
         vec3.scale(ray_wor, ray_wor, t);
+
+        //vec3.add(xyz_select, camera_position, ray_wor);
         //console.log(ray_wor);
         //Dhat = ray_wor;
       }
@@ -437,12 +448,26 @@ function mouseMove(gl, event)
             }
             if(true && snapPoint == 0)//move elements
             {
-              trains[i].children[j].move([
+              //trains[i].children[j].move([
                 //magprojaontob,//
-                xyz_select[0]-xyz_select_previous[0],
-                xyz_select[1]-xyz_select_previous[1],
-                xyz_select[2]-xyz_select_previous[2]
+              //  xyz_select[0]-xyz_select_previous[0],
+              //  xyz_select[1]-xyz_select_previous[1],
+              //  xyz_select[2]-xyz_select_previous[2]
+              //]);
+               trains[i].children[j].resetElevation();
+              let y_offset = trains[i].children[j].getPosition()[1];
+              let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + y_offset) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
+              let selection_position = vec3.create();
+              vec3.scale(selection_position, ray_wor, t);
+              vec3.add(selection_position, camera_position, selection_position);              
+
+              trains[i].children[j].setPositionTest([
+                //magprojaontob,//
+                selection_position[0],
+                selection_position[1],//trains[i].children[j].getElevation(),
+                selection_position[2]
               ]);
+                            
             }            
             if(true && snapPoint != 0)//move elements
             {
