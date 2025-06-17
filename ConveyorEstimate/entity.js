@@ -95,7 +95,7 @@ export class component  {
     {
         let current_position = this.getPosition();
         current_position[1] = this.elevation;
-        console.log(current_position[1]);
+        //console.log(current_position[1]);
         this.setPosition(current_position);
     }
     getElevation() {return this.elevation};

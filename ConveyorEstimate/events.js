@@ -38,7 +38,7 @@ function modifyText() {
   }
   
   // Add event listener to table
- document.getElementById("outside").addEventListener("click", modifyText, false);
+ //document.getElementById("outside").addEventListener("click", modifyText, false);
  
  function degToRad(degrees) {
         return degrees * Math.PI / 180;   
@@ -265,8 +265,9 @@ function buttonClick(event)
 
  }
 
-function dblClick(gl, event) 
+function dblClick(gl, event) //conflict with mousemove functions and snapping, disabled until revisit
 {
+  return;
   let pixels = new Uint8Array(1 * 1 * 4,);
   gl.readPixels (event.offsetX, gl.canvas.clientHeight-event.offsetY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   let index = pixels[0]*1+pixels[1]*256+pixels[2]*256*256;
@@ -423,9 +424,9 @@ function mouseMove(gl, event)
           if(b*b-c>0)
           {
             snapPoint = point;
-            console.log("hit");
+            //console.log("hit");
           }
-          else console.log("miss");
+         // else console.log("miss");
         }
       }
 
@@ -542,8 +543,8 @@ function mouseMove(gl, event)
           let b = vec3.dot(Dhat, camsubpoint);
           let c = vec3.dot(camsubpoint, camsubpoint);
           c = c-20*20;
-          if(b*b-c>0) console.log("hit");
-          else console.log("miss");
+          //if(b*b-c>0) console.log("hit");
+          //else console.log("miss");
         }
       }
 

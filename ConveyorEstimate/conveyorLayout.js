@@ -49,21 +49,73 @@ function main() {
 
   // Draw the scene repeatedly
   let then = 0;
+  let count = 0;//Potentially use to compute fps
+  //document.getElementById('Layout').focus();//not dependable
+  let run_once = 1;
   function render(now) 
   {
     now *= 0.001; // convert to seconds
     deltaTime = now - then;
     then = now;
-
-    cameraMovement(deltaTime, viewMatrix);
-
-    drawScene(gl, components, viewMatrix);
-
-    RotateFirstCube(components, deltaTime);
+    
+    if(isCanvasInFocus() || run_once==1)
+    {
+      if(count++%60==1) computeEstimate(trains, deltaTime);
+      cameraMovement(deltaTime, viewMatrix);
+      drawScene(gl, components, viewMatrix);
+      RotateFirstCube(components, deltaTime);
+      run_once=0;
+    }
     requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
+}
+
+function isCanvasInFocus()
+{
+  var myElement = document.getElementById('Layout'); 
+  var isFocused = myElement.matches(':focus'); 
+  if (isFocused) 
+  {
+    return true;
+  } 
+  else 
+  {
+    return false;//console.log('Element does not have focus.');
+  }  
+}
+
+function computeEstimate(trains, deltaTime)
+{
+  if(isCanvasInFocus()==false) return;
+  //Revise to omit FPS and move TTL to top
+  var ttlCost = 0;
+  var br = document.createElement("br");
+
+  document.getElementById("t2").textContent = "FPS = " + Math.round(1/deltaTime);
+  document.getElementById("t2").appendChild(br);
+  document.getElementById("t2").appendChild(document.createTextNode("TTL Cost = [computing]"));
+  document.getElementById("t2").appendChild(br.cloneNode());
+  for(let i = 0; i<trains.length; i++)
+  {
+    for(let j = 0; j<trains[i].children.length; j++)
+    {
+      let unitlength = ASSETS[trains[i].children[j].assetIndex].modelData.length;
+      let unitCost = ASSETS[trains[i].children[j].assetIndex].modelData.cost;
+      let lineCost = trains[i].children[j].length/unitlength * unitCost;
+      ttlCost = lineCost + ttlCost;
+      document.getElementById("t2").appendChild(document.createTextNode(
+        ASSETS[trains[i].children[j].assetIndex ].modelData.name
+        + " $" + 
+        (lineCost).toLocaleString('en-US')
+      ));  
+      document.getElementById("t2").appendChild(br.cloneNode());  
+    }
+  }
+  //monitor to audit TTL = SUM(Line items) to validate toLocaleString is performing Math.round correctly
+  document.getElementById("t2").firstChild.nextSibling.nextSibling.nodeValue = 
+    "TTL Cost = $" + (ttlCost).toLocaleString('en-US');
 }
 
 export function accelerate(vector)

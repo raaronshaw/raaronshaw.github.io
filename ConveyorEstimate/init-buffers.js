@@ -285,7 +285,8 @@ let VP, VC, TC, num = 0;
         name: "TAI10_48",
         width: 48,
         length: 24,
-        snaps: [vec3.fromValues(0,0,0), vec3.fromValues(24,0,0)]
+        snaps: [vec3.fromValues(0,0,0), vec3.fromValues(24,0,0)],
+        cost: 1473.75
       }
     });
 }
@@ -309,7 +310,20 @@ let VP, VC, TC, num = 0;
       
   let numItems = VP.length/3;
 
-  ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+  ASSETS.push({
+    VP_Buffer, 
+    VC_Buffer, 
+    TC_Buffer, 
+    numItems,
+    modelData:
+    {
+      name: "INT05_48",
+      width: 48,
+      length: 120,
+      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(1,0,0)],
+      cost: 538.27
+    }
+  });
 }
 
 {//DRI02_48
@@ -347,7 +361,8 @@ let VP, VC, TC, num = 0;
       name: "DRI02_48",
       width: 48,
       length: -54,
-      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(54,0,0)]
+      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(54,0,0)],
+      cost: 8017.2
     }
   });
 }
