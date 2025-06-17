@@ -1,3 +1,5 @@
+import {vec3} from './lib/glMatrix/index.js';
+
 import {
   VP_TAI10_48_Roller, VC_TAI10_48_Roller,
   VP_TAI10_48_UHMW, VC_TAI10_48_UHMW,
@@ -283,7 +285,7 @@ let VP, VC, TC, num = 0;
         name: "TAI10_48",
         width: 48,
         length: 24,
-        snaps: []
+        snaps: [vec3.fromValues(0,0,0), vec3.fromValues(24,0,0)]
       }
     });
 }
@@ -345,7 +347,7 @@ let VP, VC, TC, num = 0;
       name: "DRI02_48",
       width: 48,
       length: -54,
-      snaps: []
+      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(54,0,0)]
     }
   });
 }
