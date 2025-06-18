@@ -175,9 +175,9 @@ export class train
         }
         this.setSnaps();
     }
-    setSnaps()
+    setSnaps()//iterates through children and disables snap points already in use.
     {
-        let marginoferror = 1;
+        let marginoferror = 2;
         //let testcount =0;
         this.snaps = [];
         for(let i = 0; i<this.children.length; i++)
@@ -209,15 +209,12 @@ export class train
                     this.children[this.snaps[testfind].i].snaps[this.snaps[testfind].j].enabled=false;
                     //testcount--;//let testfind = this.snaps.find(a => a.point[0])
                 }
-                //if(i==0&&j==1) console.log("TAI 1" + point);
-                //if(i==0&&j==0) console.log("TAI 0" + point);
-                //if(i==1&&j==0) console.log("INT 0" + point);
-                //if(i==1&&j==1) console.log("INT 1" + point);
+                if(i==2&&j==1) console.log("DRI 1" + point);
+                if(i==2&&j==0) console.log("DRI 0" + point);
+                if(i==1&&j==0) console.log("INT 0" + point);
+                if(i==1&&j==1) console.log("INT 1" + point);
             }
         }
-        
-       console.log(testcount);
-       console.log("---");
     }
     getSnaps()
     {
