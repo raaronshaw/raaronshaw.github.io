@@ -480,15 +480,23 @@ function mouseMove(gl, event)
               ]);
             }            
             if(true){//rotate elements
-              let angle = 0;
+              let angley = 0;
               let trainVector = trains[i].getVector();
-              if(trainVector[0]==0) angle = Math.PI;
-              else angle = Math.atan(-trainVector[2]/trainVector[0]);
+              let anglez = 0;
+              let length = trains[i].getLength();
+              let startPos = trains[i].getStartPosition();
+              let endPos = trains[i].getEndPosition();
+              let deltaHeight = startPos[1]-endPos[1];
+
+              if(trainVector[0]==0) angley = Math.PI;
+              else angley = Math.atan(-trainVector[2]/trainVector[0]);
+              if(trainVector[0] >=0) angley += Math.PI;
               
-              if(trainVector[0] >=0) angle += Math.PI;
-              if(trainVector[0] < 0) angle += 0;
-              
-              trains[i].rotate(angle, [0,1,0]);
+              if(length==0 || deltaHeight == 0) anglez = 0;
+              else anglez = -1*Math.asin(deltaHeight/length);///length);
+              //trains[i].setRotationxy(anglex, angley);//revise models to run on x-axis for simpler and more consistent standardized modeling
+              trains[i].setRotationzy(anglez, angley);
+
             }
 
             {//need to revise such that setPosition == setPositionTest (currently setPosition a move vs a set)
@@ -692,44 +700,44 @@ let keyPressed = e.code;
 */
 }
 
-    function handleMouseMove(event) {
-        if (!mouseDown) {
-            return;
-        }
-        var newX = event.clientX;
-        var newY = event.clientY;
-        var heading = newX - lastMouseX;
-        var pitch = newY - lastMouseY;
-
-        if (heading != 0.0) {
-            var rot = quat.create();
-            quat.setAxisAngle(rot, WORLD_YAXIS, degToRad(heading));
-            rot = [rot[3], rot[0], rot[1], rot[2]];
-            m_orientation = quat.product(rot, m_orientation);
-        }
-        if (pitch != 0.0) {
-            var rot = quat.create();
-            quat.setAxisAngle(rot, WORLD_XAXIS, degToRad(pitch));
-            rot = [rot[3], rot[0], rot[1], rot[2]];
-            m_orientation = quat.product(m_orientation, rot);
-        }
-
-        //BEGIN UPDATE VIEW MATRIX//
-        mat4.fromQuat(Matrix_View, [m_orientation[1], m_orientation[2], m_orientation[3], m_orientation[0]]);
-        m_xAxis = [Matrix_View[0], Matrix_View[4], Matrix_View[8]];
-        m_yAxis = [Matrix_View[1], Matrix_View[5], Matrix_View[9]];
-        m_zAxis = [Matrix_View[2], Matrix_View[6], Matrix_View[10]];
-        m_viewDir = -m_zAxis;
-        Matrix_View[12] = -vec3.dot(m_xAxis, m_eye);
-        Matrix_View[13] = -vec3.dot(m_yAxis, m_eye);
-        Matrix_View[14] = -vec3.dot(m_zAxis, m_eye);
-        //END UPDATE VIEW MATRIX//
-        //mouse.move to lastMouseX, lastMouseY instead of below stuff
-
-        lastMouseX = newX
-        lastMouseY = newY;
-
+function handleMouseMove(event) {
+    if (!mouseDown) {
+        return;
     }
+    var newX = event.clientX;
+    var newY = event.clientY;
+    var heading = newX - lastMouseX;
+    var pitch = newY - lastMouseY;
+
+    if (heading != 0.0) {
+        var rot = quat.create();
+        quat.setAxisAngle(rot, WORLD_YAXIS, degToRad(heading));
+        rot = [rot[3], rot[0], rot[1], rot[2]];
+        m_orientation = quat.product(rot, m_orientation);
+    }
+    if (pitch != 0.0) {
+        var rot = quat.create();
+        quat.setAxisAngle(rot, WORLD_XAXIS, degToRad(pitch));
+        rot = [rot[3], rot[0], rot[1], rot[2]];
+        m_orientation = quat.product(m_orientation, rot);
+    }
+
+    //BEGIN UPDATE VIEW MATRIX//
+    mat4.fromQuat(Matrix_View, [m_orientation[1], m_orientation[2], m_orientation[3], m_orientation[0]]);
+    m_xAxis = [Matrix_View[0], Matrix_View[4], Matrix_View[8]];
+    m_yAxis = [Matrix_View[1], Matrix_View[5], Matrix_View[9]];
+    m_zAxis = [Matrix_View[2], Matrix_View[6], Matrix_View[10]];
+    m_viewDir = -m_zAxis;
+    Matrix_View[12] = -vec3.dot(m_xAxis, m_eye);
+    Matrix_View[13] = -vec3.dot(m_yAxis, m_eye);
+    Matrix_View[14] = -vec3.dot(m_zAxis, m_eye);
+    //END UPDATE VIEW MATRIX//
+    //mouse.move to lastMouseX, lastMouseY instead of below stuff
+
+    lastMouseX = newX
+    lastMouseY = newY;
+
+}
 
 
     

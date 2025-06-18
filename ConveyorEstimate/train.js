@@ -33,6 +33,7 @@ export class train
             Math.pow(a[1]-b[1],2)+
             Math.pow(a[2]-b[2],2)
         ,0.5);
+        //console.log(solution);
         return solution;
 
     }
@@ -44,6 +45,33 @@ export class train
                 child.setRotation(angle, axis);
             }
         );
+    }
+    setRotationxy(anglex, angley)
+    {
+        this.children.forEach(
+            function(child)
+            {
+                child.setRotationxy(anglex, angley);
+            }
+        );
+    }
+    setRotationzy(anglez, angley)
+    {
+        this.children.forEach(
+            function(child)
+            {
+                child.setRotationzy(anglez, angley);
+            }
+        );
+    }    
+    setRotationMatrix(rotationMatrix)
+    {
+        this.children.forEach(
+            function(child)
+            {
+                child.setRotationMatrix(rotationMatrix);
+            }
+        );        
     }
     move(xyz_delta)
     {
@@ -120,6 +148,9 @@ export class train
                     );
                     this.children[i].setPositionTest(midpoint);
                     this.children[i].setLength(vec3.distance(uiya, uiyb));
+
+
+                    //this.children[i].setRotation(1, vec3.fromValues(0,0,1));
                 }
                 if(index_prev>=0 && index_next<this.children.length && false)
                 {
@@ -139,6 +170,7 @@ export class train
                     this.children[i].setPositionTest(movetopos);
                 }
             }
+
         }
     }
 }

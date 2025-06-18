@@ -6,16 +6,12 @@ import { ASSETS } from './init-buffers.js';
 import { vec3, mat4} from './lib/glMatrix/index.js';
 import { startCanvasEvents, fb, camera_position, camera_orientation, camera_movement} from './events.js';
 import { naiveGUISetup } from './GUIPanels.js';
-import {train} from './train.js';
+import { train} from './train.js';
+import { actuated_movement, isPowerOf2 } from './globals.js';
 
-export let deltaTime = 0;
 export let defaultColor = vec3.fromValues(0.4, 0.4, 0.4);
 export let viewMatrix = mat4.create();
 export let trains = [];
-export let camera_velocity_test = 0;
-export let camera_acceleration = 0;
-export let camera_velocity_vector = vec3.create();
-
 
 main();
 
@@ -48,32 +44,30 @@ function main() {
   let fbb = startCanvasEvents(components, gl);
 
   // Draw the scene repeatedly
+  let deltaTime = 0;
   let then = 0;
-  let count = 0;//Potentially use to compute fps
-  //document.getElementById('Layout').focus();//not dependable
-  let run_once = 1;
+  let count = 0;//used to lower frequency of HTML updates
+  
   function render(now) 
   {
     now *= 0.001; // convert to seconds
     deltaTime = now - then;
     then = now;
     
-    if(isCanvasInFocus() || run_once==1)
+    if(isCanvasInFocus() || count==0)//document.getElementById('Layout').focus();//not dependable using count==0 to run_once at beginning
     {
       if(count++%60==1) computeEstimate(trains, deltaTime);
       cameraMovement(deltaTime, viewMatrix);
       drawScene(gl, components, viewMatrix);
       RotateFirstCube(components, deltaTime);
-      run_once=0;
     }
     requestAnimationFrame(render);
   }
-
   requestAnimationFrame(render);
 }
 
-function isCanvasInFocus()
-{
+//Used to stop updating HTML and avoids wasted render cycles when not in focus
+function isCanvasInFocus(){
   var myElement = document.getElementById('Layout'); 
   var isFocused = myElement.matches(':focus'); 
   if (isFocused) 
@@ -82,10 +76,11 @@ function isCanvasInFocus()
   } 
   else 
   {
-    return false;//console.log('Element does not have focus.');
+    return false;//Element does not have focus.
   }  
 }
 
+//Updates bottom cell of HTML table with line items from trains array and TTL cost
 function computeEstimate(trains, deltaTime)
 {
   if(isCanvasInFocus()==false) return;
@@ -108,31 +103,15 @@ function computeEstimate(trains, deltaTime)
       document.getElementById("t2").appendChild(document.createTextNode(
         ASSETS[trains[i].children[j].assetIndex ].modelData.name
         + " $" + 
-        (lineCost).toLocaleString('en-US')
+        (Math.round(lineCost*100)/100).toLocaleString('en-US')
       ));  
       document.getElementById("t2").appendChild(br.cloneNode());  
     }
   }
-  //monitor to audit TTL = SUM(Line items) to validate toLocaleString is performing Math.round correctly
   document.getElementById("t2").firstChild.nextSibling.nextSibling.nodeValue = 
-    "TTL Cost = $" + (ttlCost).toLocaleString('en-US');
+    "TTL Cost = $" + (Math.round(ttlCost*100)/100).toLocaleString('en-US');
 }
 
-export function accelerate(vector)
-{
-  camera_acceleration=vector[0];
-  //camera_acceleration=vector[1];
-  //camera_acceleration=vector[0];
-
-}
-export const actuated_movement = {
-  Forward: 2,
-  Backward: 4,
-  Left: 8,
-  Right: 16,
-  Up: 32,
-  Down: 64
-};
 function cameraMovement(deltaTime, viewMatrix)
 {
   // Need to revise to use deltaTime and acceleration to provide consistent performance across devices
@@ -205,16 +184,10 @@ function RotateFirstCube(components, deltaTime)
   mat4.rotate(R, R, deltaTime*speed * 0.7, [0, 1, 0]); 
   mat4.rotate(R, R, deltaTime*speed * 0.3, [1, 0, 0]); 
   components[0].setRotationMatrix(R);
-
-  
-  //setRotationMatrix();
-
 }
-
 
 function naiveEntitySetup(gl)
 {
-    
     //ASSET, shader, pos, color, texture
     trains.push(new train(-13,0,-40));
     trains[trains.length-1].testInitiate();
@@ -259,6 +232,8 @@ function naiveEntitySetup(gl)
 
 }
 
+
+//reference function for loading textures for models
 export function loadTexture(gl, defaultcolor, url) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -295,11 +270,7 @@ export function loadTexture(gl, defaultcolor, url) {
   return texture;
 }
 
-function isPowerOf2(value) {
-  return (value & (value - 1)) === 0;
-}
-
-
+//additional function for loading textures for models
 function initTexture(gl) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);

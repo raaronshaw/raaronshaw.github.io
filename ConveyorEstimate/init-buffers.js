@@ -310,6 +310,7 @@ let VP, VC, TC, num = 0;
       
   let numItems = VP.length/3;
 
+
   ASSETS.push({
     VP_Buffer, 
     VC_Buffer, 
@@ -320,10 +321,36 @@ let VP, VC, TC, num = 0;
       name: "INT05_48",
       width: 48,
       length: 120,
-      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(1,0,0)],
+      snaps: [        
+        {
+          enabled: true,
+          point: vec3.fromValues(0, 0, 0),
+          bearing: vec3.fromValues(-1,0,0)
+        },
+        {
+          enabled: true,
+          point: vec3.fromValues(120, 0, 0),
+          bearing: vec3.fromValues(1,0,0)
+        }
+      ],
       cost: 538.27
     }
   });
+  /*
+[
+        snap: 
+        {
+          enabled: false,
+          point: vec3.fromValues(0, 0, 0)
+        },
+        snap:
+        {
+          enabled: false,
+          point: vec3.fromValues(0, 0, 0)
+        }
+      ]
+
+  */
 }
 
 {//DRI02_48

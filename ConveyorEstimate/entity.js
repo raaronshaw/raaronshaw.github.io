@@ -21,18 +21,19 @@ export class component  {
         else this.assetIndex = assetIndex;
         if(shaderIndex == undefined) this.shaderIndex = 0; 
         else this.shaderIndex = shaderIndex;
-        
+        this.rotationMatrix = mat4.create();
         if(Kd == undefined) this.Kd = [0.7, 0.2, 0.2];
         else this.Kd = Kd;
         this.scaleMatrix = mat4.create();
         this.translationMatrix = mat4.create();
-        this.rotationMatrix = mat4.create();
+        //this.rotationMatrix = mat4.create();
         this.transformationMatrix = mat4.create();
         if(position != undefined) this.setTranslationMatrix(position);
         else this.setTranslationMatrix([0,0,0]);
         this.setElevation(this.getPosition()[1]);
         this.scalingMatrix = mat4.create();
-        this.rotationMatrix = mat4.create();
+        
+        this.rotation = 0;
         if (texture == undefined) this.texture = 0;
         else this.texture = texture;
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
@@ -53,20 +54,61 @@ export class component  {
     }*/
     getQuaternion() 
     {
+        return;
         let out_r = mat4.create();
         let out_t = mat4.create();
         let out_s = mat4.create();
         return mat4.decompose(out_r, out_t, out_s, this.transformationMatrix);
     }
+    setRotationMatrix(rotationMatrix)
+    {
+        this.rotationMatrix = mat4.clone(rotationMatrix);
+    }
+    resetRotation()
+    {
+        return;
+        this.setRotation(this.rotation, vec3.fromValues(0,1,0))
+    }
     setRotation(angle, axis) {
+        return;
+        if(axis==undefined) this.rotation=angle;
+        else
+        {
+            this.rotationMatrix = mat4.create();
+            mat4.rotate(this.rotationMatrix, this.rotationMatrix, angle, axis);
+            this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+        }
+    }
+    setRotationxy(anglex, angley)
+    {
         this.rotationMatrix = mat4.create();
-        mat4.rotate(this.rotationMatrix, this.rotationMatrix, angle, axis);
+        let A = mat4.create();
+        let B = mat4.create();
+        mat4.rotate(A, A, anglex, vec3.fromValues(1,0,0));
+        mat4.rotate(B, B, angley, vec3.fromValues(0,1,0));
+        mat4.multiply(this.rotationMatrix, B, A);
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
     }
+    setRotationzy(anglez, angley)
+    {
+        this.rotationMatrix = mat4.create();
+        let A = mat4.create();
+        let B = mat4.create();
+        mat4.rotate(A, A, anglez, vec3.fromValues(0,0,1));
+        mat4.rotate(B, B, angley, vec3.fromValues(0,1,0));
+        mat4.multiply(this.rotationMatrix, B, A);
+        this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
+
     rotate(x_axis, y_axis, z_axis) {
+        return;
         mat4.rotate(this.rotationMatrix, this.rotationMatrix, y_axis, [0,1,0]);
         //mat4.rotate(out, a, rad, axis);
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
+    }
+    getRotation()
+    {
+        return this.rotation;
     }
     //setPosition(position){this.setTranslationMatrix(position);}
     setPosition(position){

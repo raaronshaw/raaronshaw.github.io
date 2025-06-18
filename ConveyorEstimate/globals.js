@@ -8,3 +8,7 @@ export const actuated_movement = {//Directional mask used for camera movement an
   Up: 32,
   Down: 64
 };
+
+export function isPowerOf2(value) {
+  return (value & (value - 1)) === 0;
+}
