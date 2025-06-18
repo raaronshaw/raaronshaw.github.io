@@ -209,10 +209,10 @@ export class train
                     this.children[this.snaps[testfind].i].snaps[this.snaps[testfind].j].enabled=false;
                     //testcount--;//let testfind = this.snaps.find(a => a.point[0])
                 }
-                if(i==2&&j==1) console.log("DRI 1" + point);
-                if(i==2&&j==0) console.log("DRI 0" + point);
-                if(i==1&&j==0) console.log("INT 0" + point);
-                if(i==1&&j==1) console.log("INT 1" + point);
+                //if(i==2&&j==1) console.log("DRI 1" + point);
+                //if(i==2&&j==0) console.log("DRI 0" + point);
+                //if(i==1&&j==0) console.log("INT 0" + point);
+                //if(i==1&&j==1) console.log("INT 1" + point);
             }
         }
     }

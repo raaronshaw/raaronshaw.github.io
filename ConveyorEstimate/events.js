@@ -599,7 +599,7 @@ function mouseMove(gl, event)
 
           }
         }
-        trains[i].construct();
+        trains[i].construct();//complication occurs when creating a new train seems to reset enables for snaps.
       }
  
       Dhat = 0;
