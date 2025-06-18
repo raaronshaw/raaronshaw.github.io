@@ -190,7 +190,21 @@ let VP, VC, TC, num = 0;
       
   let numItems = VP.length/3;
 
-  ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+  //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+  ASSETS.push({
+    VP_Buffer, 
+    VC_Buffer, 
+    TC_Buffer, 
+    numItems: VP.length/3, 
+    modelData:
+    {
+      name: "Cube",
+      width: 1,
+      length: 1,
+      snaps: [],
+      cost: 1.0
+    }
+  });
 }
 
 {//Square Data
@@ -285,7 +299,18 @@ let VP, VC, TC, num = 0;
         name: "TAI10_48",
         width: 48,
         length: 24,
-        snaps: [vec3.fromValues(0,0,0), vec3.fromValues(24,0,0)],
+        snaps: [
+        {
+          enabled: true,
+          point: vec3.fromValues(0, 0, 0),
+          bearing: vec3.fromValues(-1,0,0)
+        },
+        {
+          enabled: true,
+          point: vec3.fromValues(24, 0, 0),
+          bearing: vec3.fromValues(1,0,0)
+        }          
+        ],
         cost: 1473.75
       }
     });
@@ -324,12 +349,12 @@ let VP, VC, TC, num = 0;
       snaps: [        
         {
           enabled: true,
-          point: vec3.fromValues(0, 0, 0),
+          point: vec3.fromValues(-60, 0, 0),
           bearing: vec3.fromValues(-1,0,0)
         },
         {
           enabled: true,
-          point: vec3.fromValues(120, 0, 0),
+          point: vec3.fromValues(60, 0, 0),
           bearing: vec3.fromValues(1,0,0)
         }
       ],
@@ -388,7 +413,18 @@ let VP, VC, TC, num = 0;
       name: "DRI02_48",
       width: 48,
       length: -54,
-      snaps: [vec3.fromValues(0,0,0), vec3.fromValues(54,0,0)],
+      snaps: [
+        {
+          enabled: true,
+          point: vec3.fromValues(0, 0, 0),
+          bearing: vec3.fromValues(-1,0,0)
+        },
+        {
+          enabled: true,
+          point: vec3.fromValues(-54, 0, 0),
+          bearing: vec3.fromValues(1,0,0)
+        }         
+      ],
       cost: 8017.2
     }
   });

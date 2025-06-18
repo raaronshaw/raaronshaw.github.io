@@ -411,8 +411,50 @@ function mouseMove(gl, event)
           vec3.normalize(ray_world, ray_world);
           Dhat = ray_world;
         }
-              //testing snap point hits
+        //testing snap point hits, need revised way to set initial t
+        let testcounter = 0;
+        let tsnap = {snapPoint:0, t: 1000, i: 0, j: 0, k:0 };
+        for(let i = 0; i<trains.length; i++)
         {
+         // testcounter++;//trains[i].children[j].selected == true
+          for(let j = 0; j<trains[i].children.length && trains[i].children[j].selected==false; j++)
+          {
+            for(let k = 0; k<trains[i].children[j].snaps.length; k++)
+            {
+             // testcounter++;
+              if(trains[i].children[j].snaps[k].enabled==true)
+              {
+                let camsubpoint = vec3.create();
+                let point = vec3.create();
+                let testPoint = trains[i].children[j].snaps[k].point;
+                vec4.transformMat4(point, vec4.fromValues(testPoint[0],testPoint[1],testPoint[2],1), trains[i].children[j].getTransformationMatrix());
+                vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
+                let b = vec3.dot(Dhat, camsubpoint);
+                let c = vec3.dot(camsubpoint, camsubpoint);
+                c = c-20*20;//need global for snap range
+                if(b*b-c>0)
+                {
+                  let t = -b+Math.sqrt(b*b-c);
+                  let tt = -b-Math.sqrt(b*b-c);
+                  if(tt<t)
+                  {
+                    t = tt;
+                  }
+                  if(t<tsnap.t)
+                  {
+                    tsnap.t=tt;
+                    tsnap.snapPoint = point;
+                    tsnap.i = i;
+                    tsnap.j = j;
+                    tsnap.k = k;
+                    snapPoint = point;
+                  } 
+                }
+              }
+            }
+          }
+        }
+        if(false){
           let camsubpoint = vec3.create();
           let point = vec3.create();
           let testPoint = vec3.fromValues(0,0,0);
@@ -424,6 +466,7 @@ function mouseMove(gl, event)
           if(b*b-c>0)
           {
             snapPoint = point;
+
             //console.log("hit");
           }
          // else console.log("miss");

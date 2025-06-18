@@ -14,6 +14,7 @@ export class component  {
         this.mirror = 1;
         this.width = 48;
         this.width_ratio = 1.0;
+
         if(ASSETS[assetIndex].modelData == undefined) this.length = 0;
         else this.length = ASSETS[assetIndex].modelData.length;
         this.variable_length = false;
@@ -38,6 +39,9 @@ export class component  {
         else this.texture = texture;
         this.setTransformationMatrix(this.translationMatrix, this.rotationMatrix);
         //console.log(this.uid);
+        if(ASSETS[assetIndex].modelData==undefined)
+            this.snaps = [];
+        else this.snaps=ASSETS[assetIndex].modelData.snaps;
     }
     setLength(length)
     {
