@@ -349,12 +349,12 @@ let VP, VC, TC, num = 0;
       snaps: [        
         {
           enabled: true,
-          point: vec3.fromValues(-60, 0, 0),
+          point: vec3.fromValues(-0.5, 0, 0),
           bearing: vec3.fromValues(-1,0,0)
         },
         {
           enabled: true,
-          point: vec3.fromValues(60, 0, 0),
+          point: vec3.fromValues(0.5, 0, 0),
           bearing: vec3.fromValues(1,0,0)
         }
       ],
@@ -418,12 +418,13 @@ let VP, VC, TC, num = 0;
           enabled: true,
           point: vec3.fromValues(0, 0, 0),
           bearing: vec3.fromValues(-1,0,0)
-        },
+        }
+        ,
         {
           enabled: true,
           point: vec3.fromValues(-54, 0, 0),
           bearing: vec3.fromValues(1,0,0)
-        }         
+        }        
       ],
       cost: 8017.2
     }

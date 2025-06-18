@@ -11,6 +11,7 @@ export class train
         this.end = vec3.fromValues(x+10, y, z);
         this.selected = false;
         this.children = [];
+        this.snaps = [];
         if(components!=undefined)
             for(const child of components)
                 this.children.push(child);
@@ -172,5 +173,54 @@ export class train
             }
 
         }
+        this.setSnaps();
+    }
+    setSnaps()
+    {
+        let marginoferror = 1;
+        //let testcount =0;
+        this.snaps = [];
+        for(let i = 0; i<this.children.length; i++)
+        {
+            for(let j = 0; j<this.children[i].snaps.length; j++)
+            {
+                this.children[i].snaps[j].enabled=true;
+                
+                let point = vec4.create();
+                let aa = this.children[i].snaps[j].point;
+                vec4.transformMat4(point, vec4.fromValues(aa[0], aa[1], aa[2], 1), this.children[i].getTransformationMatrix());
+                
+                
+                let testfind = this.snaps.findIndex(a => (
+                    ((a[0]-point[0])*(a[0]-point[0])+
+                    (a[1]-point[1])*(a[1]-point[1])+
+                    (a[2]-point[2])*(a[2]-point[2]))<marginoferror
+                ));
+                if(testfind==-1)
+                {
+                    this.snaps.push(point);
+                    this.snaps[this.snaps.length-1].i = i;
+                    this.snaps[this.snaps.length-1].j = j;
+                    //testcount++;
+                }
+                if(testfind>-1)
+                {   
+                    this.children[i].snaps[j].enabled=false;
+                    this.children[this.snaps[testfind].i].snaps[this.snaps[testfind].j].enabled=false;
+                    //testcount--;//let testfind = this.snaps.find(a => a.point[0])
+                }
+                //if(i==0&&j==1) console.log("TAI 1" + point);
+                //if(i==0&&j==0) console.log("TAI 0" + point);
+                //if(i==1&&j==0) console.log("INT 0" + point);
+                //if(i==1&&j==1) console.log("INT 1" + point);
+            }
+        }
+        
+       console.log(testcount);
+       console.log("---");
+    }
+    getSnaps()
+    {
+        return this.snaps;
     }
 }
