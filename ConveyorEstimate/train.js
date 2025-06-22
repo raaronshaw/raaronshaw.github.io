@@ -149,9 +149,6 @@ export class train
                     );
                     this.children[i].setPositionTest(midpoint);
                     this.children[i].setLength(vec3.distance(uiya, uiyb));
-
-
-                    //this.children[i].setRotation(1, vec3.fromValues(0,0,1));
                 }
                 if(index_prev>=0 && index_next<this.children.length && false)
                 {
@@ -174,12 +171,15 @@ export class train
 
         }
         this.setSnaps();
+
     }
-    setSnaps()//iterates through children and disables snap points already in use.
+    setSnaps()//iterates through children and disables snap points already in use. Need overhaul
     {
         let marginoferror = 2;
         //let testcount =0;
         this.snaps = [];
+        let testsnaps = [];
+        let tempsnaps = [];
         for(let i = 0; i<this.children.length; i++)
         {
             for(let j = 0; j<this.children[i].snaps.length; j++)
@@ -190,29 +190,39 @@ export class train
                 let aa = this.children[i].snaps[j].point;
                 vec4.transformMat4(point, vec4.fromValues(aa[0], aa[1], aa[2], 1), this.children[i].getTransformationMatrix());
                 
-                
-                let testfind = this.snaps.findIndex(a => (
+                let testfind = tempsnaps.findIndex(a => (
                     ((a[0]-point[0])*(a[0]-point[0])+
                     (a[1]-point[1])*(a[1]-point[1])+
                     (a[2]-point[2])*(a[2]-point[2]))<marginoferror
                 ));
                 if(testfind==-1)
                 {
-                    this.snaps.push(point);
-                    this.snaps[this.snaps.length-1].i = i;
-                    this.snaps[this.snaps.length-1].j = j;
-                    //testcount++;
+                    tempsnaps.push(point);
+                    tempsnaps[tempsnaps.length-1].i = i;
+                    tempsnaps[tempsnaps.length-1].j = j;
                 }
                 if(testfind>-1)
                 {   
                     this.children[i].snaps[j].enabled=false;
-                    this.children[this.snaps[testfind].i].snaps[this.snaps[testfind].j].enabled=false;
-                    //testcount--;//let testfind = this.snaps.find(a => a.point[0])
+                    this.children[tempsnaps[testfind].i].snaps[tempsnaps[testfind].j].enabled=false;
                 }
-                //if(i==2&&j==1) console.log("DRI 1" + point);
-                //if(i==2&&j==0) console.log("DRI 0" + point);
-                //if(i==1&&j==0) console.log("INT 0" + point);
-                //if(i==1&&j==1) console.log("INT 1" + point);
+            }
+        }
+
+        for(let j = 0; j<this.children.length; j++)
+        {
+            for(let k = 0; k<this.children[j].snaps.length; k++)
+            {
+                if(this.children[j].snaps[k].enabled==true)
+                {
+                    let point = vec4.create();
+                    let aa = this.children[j].snaps[k].point;
+                    vec4.transformMat4(point, vec4.fromValues(aa[0], aa[1], aa[2], 1), this.children[j].getTransformationMatrix());                            
+                    this.snaps.push({
+                        point: point,
+                        bearing: this.children[j].snaps[k].bearing
+                    });
+                }
             }
         }
     }

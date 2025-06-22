@@ -1,11 +1,6 @@
 import {vec3} from './lib/glMatrix/index.js';
 
 import {
-  VP_TAI10_48_Roller, VC_TAI10_48_Roller,
-  VP_TAI10_48_UHMW, VC_TAI10_48_UHMW,
-  VP_TAI10_48_Pulley, VC_TAI10_48_Pulley,
-  VP_TAI10_48_Frame, VC_TAI10_48_Frame,
-  VP_TAI10_48_Bearing, VC_TAI10_48_Bearing,
   VP_TAI10_48_Part001, VC_TAI10_48_Part001,
   VP_TAI10_48_Part002, VC_TAI10_48_Part002
 
@@ -345,7 +340,7 @@ let VP, VC, TC, num = 0;
     {
       name: "INT05_48",
       width: 48,
-      length: 120,
+      length: 1,
       snaps: [        
         {
           enabled: true,
@@ -358,7 +353,7 @@ let VP, VC, TC, num = 0;
           bearing: vec3.fromValues(1,0,0)
         }
       ],
-      cost: 538.27
+      cost: 538.27/120
     }
   });
   /*

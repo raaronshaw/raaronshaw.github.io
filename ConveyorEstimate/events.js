@@ -346,6 +346,7 @@ function mouseMove(gl, event)
       let ray_wor = 0;
       let Dhat = 0;
       let snapPoint = 0;
+      let tsnap = {snapPoint:0, t: 1000, i: 0, j: 0, k:0, enabled: false};
       {
         let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
         let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
@@ -411,113 +412,59 @@ function mouseMove(gl, event)
           vec3.normalize(ray_world, ray_world);
           Dhat = ray_world;
         }
-        //testing snap point hits, need revised way to set initial t
-        let testcounter = 0;
-        let tsnap = {snapPoint:0, t: 1000, i: 0, j: 0, k:0 };
+
         if(true)
         {
           for(let i = 0; i<trains.length; i++)
           {
-          // testcounter++;//trains[i].children[j].selected == true
-            for(let j = 0; j<trains[i].children.length && trains[i].children[j].selected==false; j++)
+            let skip = false;
+            for(let j = 0; j<trains[i].children.length; j++)
             {
-              for(let k = 0; k<trains[i].children[j].snaps.length; k++)
+              if(trains[i].children[j].selected == true)
               {
-              // testcounter++;
-                if(trains[i].children[j].snaps[k].enabled==true)
-                {
-                  let camsubpoint = vec3.create();
-                  let point = vec3.create();
-                  let testPoint = trains[i].children[j].snaps[k].point;
-                  vec4.transformMat4(point, vec4.fromValues(testPoint[0],testPoint[1],testPoint[2],1), trains[i].children[j].getTransformationMatrix());
-                  vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
-                  let b = vec3.dot(Dhat, camsubpoint);
-                  let c = vec3.dot(camsubpoint, camsubpoint);
-                  c = c-20*20;//need global for snap range
-                  if(b*b-c>0)
-                  {
-                    let t = -b+Math.sqrt(b*b-c);
-                    let tt = -b-Math.sqrt(b*b-c);
-                    if(tt<t)
-                    {
-                      t = tt;
-                    }
-                    if(t<tsnap.t)
-                    {
-                      tsnap.t=tt;
-                      tsnap.snapPoint = point;
-                      tsnap.i = i;
-                      tsnap.j = j;
-                      tsnap.k = k;
-                      snapPoint = point;
-                    } 
-                  }
-                }
+                skip = true;
               }
             }
-          }
-        }
-       if(false)//known working
-        {
-          for(let i = 0; i<trains.length; i++)
-          {
-          // testcounter++;//trains[i].children[j].selected == true
-            for(let j = 0; j<trains[i].children.length && trains[i].children[j].selected==false; j++)
+            if(skip==false)
             {
-              for(let k = 0; k<trains[i].children[j].snaps.length; k++)
+              let trainsnaps = trains[i].getSnaps();
+              for(let u = 0; u<trainsnaps.length; u++)
               {
-              // testcounter++;
-                if(trains[i].children[j].snaps[k].enabled==true)
+                let camsubpoint = vec3.create();
+                let point = trainsnaps[u].point;
+                //let testPoint = trains[i].children[j].snaps[k].point;
+                //vec4.transformMat4(point, vec4.fromValues(testPoint[0],testPoint[1],testPoint[2],1), trains[i].children[j].getTransformationMatrix());
+                vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
+                let b = vec3.dot(Dhat, camsubpoint);
+                let c = vec3.dot(camsubpoint, camsubpoint);
+                c = c-20*20;//need global for snap range
+                if(b*b-c>0)
                 {
-                  let camsubpoint = vec3.create();
-                  let point = vec3.create();
-                  let testPoint = trains[i].children[j].snaps[k].point;
-                  vec4.transformMat4(point, vec4.fromValues(testPoint[0],testPoint[1],testPoint[2],1), trains[i].children[j].getTransformationMatrix());
-                  vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
-                  let b = vec3.dot(Dhat, camsubpoint);
-                  let c = vec3.dot(camsubpoint, camsubpoint);
-                  c = c-20*20;//need global for snap range
-                  if(b*b-c>0)
+                  let t = -b+Math.sqrt(b*b-c);
+                  let tt = -b-Math.sqrt(b*b-c);
+                  if(tt<t)
                   {
-                    let t = -b+Math.sqrt(b*b-c);
-                    let tt = -b-Math.sqrt(b*b-c);
-                    if(tt<t)
-                    {
-                      t = tt;
-                    }
-                    if(t<tsnap.t)
-                    {
-                      tsnap.t=tt;
-                      tsnap.snapPoint = point;
-                      tsnap.i = i;
-                      tsnap.j = j;
-                      tsnap.k = k;
-                      snapPoint = point;
-                    } 
+                    t = tt;
                   }
-                }
-              }
+                  if(t<tsnap.t)
+                  {
+                    tsnap.t=t;
+                    tsnap.snapPoint = point;
+                    //tsnap.i = i;
+                    //tsnap.j = j;
+                    //tsnap.k = k;
+                    snapPoint = point;
+                    //tsnap.enabled = trains[i].children[j].snaps[k].enabled;
+                    //console.log("00 is it enabled 0 2 1" + trains[0].children[2].snaps[1].enabled);
+                  }
+                } 
+              }              
             }
           }
-        }        
-        if(false){
-          let camsubpoint = vec3.create();
-          let point = vec3.create();
-          let testPoint = vec3.fromValues(0,0,0);
-          vec4.transformMat4(point, vec4.fromValues(testPoint[0],testPoint[1],testPoint[2],1), trains[0].children[2].getTransformationMatrix());
-          vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
-          let b = vec3.dot(Dhat, camsubpoint);
-          let c = vec3.dot(camsubpoint, camsubpoint);
-          c = c-20*20;
-          if(b*b-c>0)
-          {
-            snapPoint = point;
-
-            //console.log("hit");
-          }
-         // else console.log("miss");
         }
       }
+      
+
 
       for(let i = 0; i<trains.length; i++)
       {
@@ -536,15 +483,9 @@ function mouseMove(gl, event)
                 xyz_select[2]-xyz_select_previous[2]
               ]);
             }
-            if(true && snapPoint == 0)//move elements
+            if(true && tsnap.snapPoint == 0)//move elements
             {
-              //trains[i].children[j].move([
-                //magprojaontob,//
-              //  xyz_select[0]-xyz_select_previous[0],
-              //  xyz_select[1]-xyz_select_previous[1],
-              //  xyz_select[2]-xyz_select_previous[2]
-              //]);
-               trains[i].children[j].resetElevation();
+              trains[i].children[j].resetElevation();
               let y_offset = trains[i].children[j].getPosition()[1];
               let t = (-1.0 * vec3.dot(camera_position, vec3.fromValues(0,1.0,0.0)) + y_offset) / vec3.dot(ray_wor, vec3.fromValues(0,1.0,0.0));
               let selection_position = vec3.create();
@@ -559,14 +500,33 @@ function mouseMove(gl, event)
               ]);
                             
             }            
-            if(true && snapPoint != 0)//move elements
+            if(true && tsnap.snapPoint != 0)//move elements
             {
               trains[i].children[j].setPositionTest([
                 //magprojaontob,//
-                snapPoint[0],//xyz_select[0]-xyz_select_previous[0],
-                snapPoint[1],//xyz_select[1]-xyz_select_previous[1],
-                snapPoint[2]//xyz_select[2]-xyz_select_previous[2]
+                tsnap.snapPoint[0],//xyz_select[0]-xyz_select_previous[0],
+                tsnap.snapPoint[1],//xyz_select[1]-xyz_select_previous[1],
+                tsnap.snapPoint[2]//xyz_select[2]-xyz_select_previous[2]
               ]);
+              //console.log(tsnap.i + " " + tsnap.j + " " + tsnap.k + " " + tsnap.enabled);
+              
+            }
+            if(false && i==2)//testing bug
+            {
+              console.log("test bug start");
+              for(let j = 0; j<trains[0].children.length;j++)
+              {
+                for(let k = 0; k<trains[0].children[j].snaps.length; k++)
+                {
+                  let point = vec4.create();
+                  let aa = trains[0].children[j].snaps[k].point;
+                  vec4.transformMat4(point, vec4.fromValues(aa[0], aa[1], aa[2], 1), trains[0].children[j].getTransformationMatrix());
+                  let isenabled = trains[0].children[j].snaps[k].enabled;
+                  console.log(point + " " + isenabled + " " + 0 + " " + j + " " + k);
+                  //console.log(trains[0].children[j].snaps[k].point);
+                }
+              }
+              console.log("test bug end");
             }            
             if(true){//rotate elements
               let angley = 0;
@@ -588,68 +548,25 @@ function mouseMove(gl, event)
 
             }
 
-            {//need to revise such that setPosition == setPositionTest (currently setPosition a move vs a set)
-              //let testingxyz = trains[i].children[j].getPosition();
-              //trains[i].children[j].setPositionTest(testingxyz);
-            }
-            
-            
-
-            
 
           }
         }
-        trains[i].construct();//complication occurs when creating a new train seems to reset enables for snaps.
+        
       }
  
       Dhat = 0;
-      if(false)//need to figure out what is different from raycast at start of this function as ray_world is different
-      {
-        {
-          let x = (2.0 * event.offsetX) / gl.canvas.clientWidth - 1.0; 
-          let y = 1.0 - (2.0 * event.offsetY) / gl.canvas.clientHeight; 
-          let z = 1.0; 
-          his_x = x;
-          let invertedProjectionMatrix = mat4.create();
-          mat4.invert(invertedProjectionMatrix, projectionMatrix);
-
-          let ray_eye = vec4.fromValues(
-            invertedProjectionMatrix[0] * x + invertedProjectionMatrix[4] * y + invertedProjectionMatrix[8]  * -1.0 + invertedProjectionMatrix[12], 
-            invertedProjectionMatrix[1] * x + invertedProjectionMatrix[5] * y + invertedProjectionMatrix[9]  * -1.0 + invertedProjectionMatrix[13], 
-            -1.0, 
-            0.0);
-
-          let invertedViewMatrix = mat4.create();
-          mat4.invert(invertedViewMatrix, viewMatrix);
-          
-          let ray_world = vec3.fromValues(
-            invertedViewMatrix[0] * ray_eye[0] + invertedViewMatrix[4] * ray_eye[1] + invertedViewMatrix[8]  * -1.0, 
-            invertedViewMatrix[1] * ray_eye[0] + invertedViewMatrix[5] * ray_eye[1] + invertedViewMatrix[9]  * -1.0, 
-            invertedViewMatrix[2] * ray_eye[0] + invertedViewMatrix[6] * ray_eye[1] + invertedViewMatrix[10] * -1.0
-          ); 
-          //Dhattesttwo = ray_wort;
-          vec3.normalize(ray_world, ray_world);
-          Dhat = ray_world;
-        }
-              //testing snap point hits
-        {
-          let camsubpoint = vec3.create();
-          let point = vec3.create();
-          vec4.transformMat4(point, vec4.fromValues(79,0,0,1), trains[0].children[0].getTransformationMatrix());
-          vec3.subtract(camsubpoint, vec3.fromValues(point[0],point[1],point[2]), camera_position);
-          let b = vec3.dot(Dhat, camsubpoint);
-          let c = vec3.dot(camsubpoint, camsubpoint);
-          c = c-20*20;
-          //if(b*b-c>0) console.log("hit");
-          //else console.log("miss");
-        }
-      }
+    
 
 
       xyz_select_previous = [xyz_select[0], xyz_select[1], xyz_select[2]];
       vec3.add(xyz_select, camera_position, ray_wor);
 
-   
+
+      for(let i =0; i<trains.length; i++)
+      {
+        trains[i].construct();//complication occurs when creating a new train seems to reset enables for snaps.
+      }
+
     }
   }
 
