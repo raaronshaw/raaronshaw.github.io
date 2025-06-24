@@ -87,7 +87,7 @@ function modifyText() {
 
 function buttonClick(event)
 {
-  if(event.target.id=="CHU01_60" || event.target.id=="DRI02_48")//temp start work on add via button
+  if(true || event.target.id=="CHU01_60" || event.target.id=="DRI02_48")//temp start work on add via button
   {
     //new component(0, 0, [-10.0, -10.0, -50.0], texture, defaultColor)
     //new component(model.TAI10_48, 0, [ this.start[0],        this.start[1], this.start[2]], 0, defaultColor),

@@ -22,6 +22,14 @@ function initBuffers(gl) {
     setupAssets(gl);
   }
 
+import {
+   VP_NOS01_48, VC_NOS01_48
+} from './lib/models/Asset_Models/NOS01_48.js'
+
+import {
+   VP_HIT08_48, VC_HIT08_48
+} from './lib/models/Asset_Models/HIT08_48.js'
+
 export const ASSETS = [];
 
 export const model = {
@@ -30,7 +38,9 @@ export const model = {
   TAI10_48: 2,
   INT05_48: 3,
   DRI02_48: 4,
-  CHU01_60: 5
+  CHU01_60: 5,
+  NOS01_48: 6,
+  HIT08_48: 7
 };
                   //24 TAI/
                   // 1 INT/
@@ -447,7 +457,137 @@ let VP, VC, TC, num = 0;
         
     let numItems = VP.length/3;
 
-    ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+    
+    ASSETS.push({
+      VP_Buffer, 
+      VC_Buffer, 
+      TC_Buffer, 
+      numItems: VP.length/3, 
+      modelData:
+      {
+        name: "CHU01_60",
+        width: 48,
+        length: -54,
+        snaps: [
+          {
+            enabled: true,
+            point: vec3.fromValues(0, 0, 0),
+            bearing: vec3.fromValues(-1,0,0)
+          }
+          ,
+          {
+            enabled: true,
+            point: vec3.fromValues(-54, 0, 0),
+            bearing: vec3.fromValues(1,0,0)
+          }        
+        ],
+        cost: 0
+      }
+    });
+}
+
+{//NOS01_48
+    VP = VP_NOS01_48;
+
+    VC = VC_NOS01_48;
+
+    TC = [0];//empty texture buffer
+
+    let VP_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, VP_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VP), gl.STATIC_DRAW);
+
+    let VC_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, VC_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VC), gl.STATIC_DRAW);
+
+    let TC_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, TC_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(TC), gl.STATIC_DRAW);
+        
+    let numItems = VP.length/3;
+
+    //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+
+    ASSETS.push({
+      VP_Buffer, 
+      VC_Buffer, 
+      TC_Buffer, 
+      numItems: VP.length/3, 
+      modelData:
+      {
+        name: "NOS01_48",
+        width: 48,
+        length: -54,
+        snaps: [
+          {
+            enabled: true,
+            point: vec3.fromValues(0, 0, 0),
+            bearing: vec3.fromValues(-1,0,0)
+          }
+          ,
+          {
+            enabled: true,
+            point: vec3.fromValues(-54, 0, 0),
+            bearing: vec3.fromValues(1,0,0)
+          }        
+        ],
+        cost: 0
+      }
+    });
+
+}
+
+{//HIT08_48
+    VP = VP_HIT08_48;
+
+    VC = VC_HIT08_48;
+
+    TC = [0];//empty texture buffer
+
+    let VP_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, VP_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VP), gl.STATIC_DRAW);
+
+    let VC_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, VC_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VC), gl.STATIC_DRAW);
+
+    let TC_Buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, TC_Buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(TC), gl.STATIC_DRAW);
+        
+    let numItems = VP.length/3;
+
+    //ASSETS.push({VP_Buffer, VC_Buffer, TC_Buffer, numItems});
+
+    ASSETS.push({
+      VP_Buffer, 
+      VC_Buffer, 
+      TC_Buffer, 
+      numItems: VP.length/3, 
+      modelData:
+      {
+        name: "HIT08_48",
+        width: 48,
+        length: -54,
+        snaps: [
+          {
+            enabled: true,
+            point: vec3.fromValues(0, 0, 0),
+            bearing: vec3.fromValues(-1,0,0)
+          }
+          ,
+          {
+            enabled: true,
+            point: vec3.fromValues(-54, 0, 0),
+            bearing: vec3.fromValues(1,0,0)
+          }        
+        ],
+        cost: 0
+      }
+    });    
+
 }
   //console.log("init-buffers.js");
  // console.log(ASSETS[0]);
